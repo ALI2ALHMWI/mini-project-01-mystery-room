@@ -1,197 +1,213 @@
-import { useEffect, useState, type ReactNode } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ApiError,
   getMysteryById,
   requestHint as fetchHint,
   submitAnswer as sendAnswer,
-} from '../../services/api'
-import type { HintResponse, Mystery, Question } from '../../types/mystery.types'
+} from "../../services/api";
+import type {
+  HintResponse,
+  Mystery,
+  Question,
+} from "../../types/mystery.types";
+import QuestionCard from "../../components/question/QuestionCard";
+import HintCard from "../../components/hint/HintCard";
+import { useNotification } from "../../context/NotificationContext";
 
 export interface MysteryGameplayProps {
-  mystery: Mystery
-  question: Question
-  feedback: { type: 'success' | 'error'; message: string } | null
-  hint: HintResponse | null
-  hintsRemaining: number
-  hintsUsed: number
-  isSubmitting: boolean
-  isRequestingHint: boolean
-  submitAnswer: (answer: string) => Promise<void>
-  requestHint: () => Promise<void>
-}
-
-interface MysteryPageProps {
-  children?: (gameplay: MysteryGameplayProps) => ReactNode
+  mystery: Mystery;
+  question: Question;
+  feedback: { type: "success" | "error"; message: string } | null;
+  hint: HintResponse | null;
+  hintsRemaining: number;
+  hintsUsed: number;
+  isSubmitting: boolean;
+  isRequestingHint: boolean;
+  submitAnswer: (answer: string) => Promise<void>;
+  requestHint: () => Promise<void>;
 }
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
-    return error.message
+    return error.message;
   }
 
   if (error instanceof Error) {
-    return error.message
+    return error.message;
   }
 
-  return 'Something went wrong. Please try again.'
+  return "Something went wrong. Please try again.";
 }
 
-export default function MysteryPage({ children }: MysteryPageProps) {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const [mystery, setMystery] = useState<Mystery | null>(null)
-  const [questionId, setQuestionId] = useState<number | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [actionError, setActionError] = useState<string | null>(null)
-  const [feedback, setFeedback] = useState<MysteryGameplayProps['feedback']>(null)
-  const [hint, setHint] = useState<HintResponse | null>(null)
-  const [hintsRemaining, setHintsRemaining] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isRequestingHint, setIsRequestingHint] = useState(false)
+export default function MysteryPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
+  const [mystery, setMystery] = useState<Mystery | null>(null);
+  const [questionId, setQuestionId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [feedback, setFeedback] =
+    useState<MysteryGameplayProps["feedback"]>(null);
+  const [hint, setHint] = useState<HintResponse | null>(null);
+  const [hintsRemaining, setHintsRemaining] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRequestingHint, setIsRequestingHint] = useState(false);
+  const { showNotification } = useNotification();
   useEffect(() => {
     if (!id) {
-      setLoadError('Mystery ID is missing from the URL.')
-      setIsLoading(false)
-      return
+      setLoadError("Mystery ID is missing from the URL.");
+      setIsLoading(false);
+      return;
     }
 
-    let isCurrentRequest = true
-    setIsLoading(true)
-    setLoadError(null)
-    setMystery(null)
-    setQuestionId(null)
+    let isCurrentRequest = true;
+
+    setIsLoading(true);
+    setLoadError(null);
+    setMystery(null);
+    setQuestionId(null);
+    setHint(null);
+    setFeedback(null);
+    setActionError(null);
 
     getMysteryById(id)
       .then((loadedMystery) => {
-        if (!isCurrentRequest) return
+        if (!isCurrentRequest) return;
 
         if (loadedMystery.completed) {
-          navigate(`/result/${encodeURIComponent(id)}`, { replace: true })
-          return
+          navigate(`/result/${encodeURIComponent(id)}`, { replace: true });
+          return;
         }
 
         const currentQuestion = loadedMystery.questions.find(
           (item) => item.id === loadedMystery.currentQuestionId,
-        )
+        );
 
         if (!currentQuestion) {
-          setLoadError('The current question is unavailable for this mystery.')
-          return
+          setLoadError("The current question is unavailable for this mystery.");
+          return;
         }
 
-        setMystery(loadedMystery)
-        setQuestionId(currentQuestion.id)
-        setHintsRemaining(
-          currentQuestion.maxHints -
-            (loadedMystery.hintsUsed[String(currentQuestion.id)] ?? 0),
-        )
+        const usedHints =
+          loadedMystery.hintsUsed[String(currentQuestion.id)] ?? 0;
+
+        setMystery(loadedMystery);
+        setQuestionId(currentQuestion.id);
+        setHintsRemaining(Math.max(currentQuestion.maxHints - usedHints, 0));
       })
       .catch((error: unknown) => {
-        if (isCurrentRequest) setLoadError(getErrorMessage(error))
+        if (isCurrentRequest) {
+          setLoadError(getErrorMessage(error));
+        }
       })
       .finally(() => {
-        if (isCurrentRequest) setIsLoading(false)
-      })
+        if (isCurrentRequest) {
+          setIsLoading(false);
+        }
+      });
 
     return () => {
-      isCurrentRequest = false
-    }
-  }, [id, navigate])
+      isCurrentRequest = false;
+    };
+  }, [id, navigate]);
 
   const orderedQuestions = mystery
     ? [...mystery.questions].sort((left, right) => left.order - right.order)
-    : []
-  const question = orderedQuestions.find((item) => item.id === questionId)
+    : [];
+
+  const question = orderedQuestions.find((item) => item.id === questionId);
 
   async function submitAnswer(answer: string): Promise<void> {
-    if (!id || !question || isSubmitting) return
+    if (!id || !question || isSubmitting) return;
 
-    setIsSubmitting(true)
-    setActionError(null)
-    setFeedback(null)
+    setIsSubmitting(true);
+    setActionError(null);
+    setFeedback(null);
 
     try {
-      const result = await sendAnswer(id, question.id, answer)
+      const result = await sendAnswer(id, question.id, answer);
 
       if (!result.correct) {
-        setFeedback({ type: 'error', message: result.message })
-        return
+        setFeedback({
+          type: "error",
+          message: result.message,
+        });
+        return;
       }
-
+      showNotification("success", result.message);
       if (result.mysteryCompleted) {
         navigate(`/result/${encodeURIComponent(id)}`, {
           state: {
             finalReveal: result.finalReveal,
             nextMysteryId: result.nextMysteryId,
           },
-        })
-        return
+        });
+        return;
       }
 
       const nextQuestion = orderedQuestions.find(
         (item) => item.id === result.nextQuestionId,
-      )
+      );
 
       if (!nextQuestion) {
-        setActionError('The server returned an invalid next question.')
-        return
+        setActionError("The server returned an invalid next question.");
+        return;
       }
 
-      setQuestionId(nextQuestion.id)
-      setHintsRemaining(nextQuestion.maxHints)
-      setHint(null)
-      setFeedback({ type: 'success', message: result.message })
+      setQuestionId(nextQuestion.id);
+      setHintsRemaining(nextQuestion.maxHints);
+      setHint(null);
+      setFeedback({
+        type: "success",
+        message: result.message,
+      });
     } catch (error: unknown) {
-      setActionError(getErrorMessage(error))
+      setActionError(getErrorMessage(error));
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
   async function requestCurrentHint(): Promise<void> {
-    if (!id || !question || isRequestingHint || hintsRemaining <= 0) return
+    if (!id || !question || isRequestingHint || hintsRemaining <= 0) {
+      return;
+    }
 
-    setIsRequestingHint(true)
-    setActionError(null)
+    setIsRequestingHint(true);
+    setActionError(null);
 
     try {
-      const nextHint = await fetchHint(id, question.id)
-      setHint(nextHint)
-      setHintsRemaining(nextHint.hintsRemaining)
+      const nextHint = await fetchHint(id, question.id);
+
+      setHint(nextHint);
+      setHintsRemaining(nextHint.hintsRemaining);
     } catch (error: unknown) {
-      setActionError(getErrorMessage(error))
+      setActionError(getErrorMessage(error));
     } finally {
-      setIsRequestingHint(false)
+      setIsRequestingHint(false);
     }
   }
 
   if (isLoading) {
-    return <main aria-busy="true">Loading mystery...</main>
+    return (
+      <main aria-busy="true">
+        <p>Loading mystery...</p>
+      </main>
+    );
   }
 
   if (loadError || !mystery || !question) {
     return (
       <main>
-        <p role="alert">{loadError ?? 'Mystery data is unavailable.'}</p>
+        <p role="alert">{loadError ?? "Mystery data is unavailable."}</p>
       </main>
-    )
+    );
   }
 
-  const gameplay: MysteryGameplayProps = {
-    mystery,
-    question,
-    feedback,
-    hint,
-    hintsRemaining,
-    hintsUsed: question.maxHints - hintsRemaining,
-    isSubmitting,
-    isRequestingHint,
-    submitAnswer,
-    requestHint: requestCurrentHint,
-  }
+  const hintsUsed = question.maxHints - hintsRemaining;
 
   return (
     <main>
@@ -209,17 +225,27 @@ export default function MysteryPage({ children }: MysteryPageProps) {
         <h2 id="mystery-question-heading">
           Question {question.order} of {orderedQuestions.length}
         </h2>
-        {children ? (
-          children(gameplay)
-        ) : (
-          <>
-            <p>{question.text}</p>
-            <p>{gameplay.hintsUsed} hint(s) used</p>
-          </>
-        )}
-        {feedback && <p role="status">{feedback.message}</p>}
+
+        <QuestionCard
+          questionId={question.id}
+          questionNumber={question.order}
+          totalQuestions={orderedQuestions.length}
+          question={question.text}
+          onSubmit={submitAnswer}
+          isSubmitting={isSubmitting}
+          feedback={feedback ?? undefined}
+        />
+
+        <HintCard
+          hint={hint?.hint}
+          hintsUsed={hintsUsed}
+          maxHints={question.maxHints}
+          onRequestHint={requestCurrentHint}
+          isLoading={isRequestingHint}
+        />
+
         {actionError && <p role="alert">{actionError}</p>}
       </section>
     </main>
-  )
+  );
 }

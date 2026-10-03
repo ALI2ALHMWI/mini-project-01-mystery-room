@@ -51,16 +51,36 @@ function toPublicMystery(mystery, state) {
     description: mystery.description,
     story: mystery.story,
     questions: getOrderedQuestions(mystery).map(toPublicQuestion),
+
+    currentQuestionId: state?.currentQuestionId ?? null,
+    completed: state?.completed ?? false,
+    hintsUsed: state?.hintsUsed ?? {},
   };
 
-  if (state && state.completed) {
+  if (state?.completed) {
     base.finalReveal = mystery.finalReveal;
     base.nextMysteryId = mystery.nextMysteryId ?? null;
   }
 
   return base;
 }
+function isMysteryUnlocked(mysteryId) {
+  const index = mysteries.findIndex((m) => m.id === mysteryId);
 
+  if (index === -1) {
+    return false;
+  }
+
+  // The first mystery is always unlocked.
+  if (index === 0) {
+    return true;
+  }
+
+  const previousMystery = mysteries[index - 1];
+  const previousState = gameState.mysteries[previousMystery.id];
+
+  return previousState?.completed === true;
+}
 /**
  * Public shape of a mystery list item (collection view).
  */
@@ -69,8 +89,10 @@ function toPublicMysteryListItem(mystery) {
     id: mystery.id,
     title: mystery.title,
     description: mystery.description,
+    unlocked: isMysteryUnlocked(mystery.id),
   };
 }
+
 
 /**
  * Lazily create runtime state for a mystery on first access.
@@ -92,6 +114,8 @@ function ensureMysteryState(mysteryId) {
   return gameState.mysteries[mysteryId];
 }
 
+
+
 /* ------------------------------------------------------------------ */
 /* GET /api/mysteries                                                  */
 /* ------------------------------------------------------------------ */
@@ -107,18 +131,28 @@ export function getMysteries(req, res) {
 
 export function getMysteryById(req, res) {
   const idCheck = validateRequiredId(req.params.id, "Mystery ID");
+
   if (!idCheck.valid) {
     return res.status(400).json({ message: idCheck.message });
   }
 
   const mystery = findMystery(req.params.id);
+
   if (!mystery) {
     return res.status(404).json({ message: "Mystery not found." });
   }
 
+  if (!isMysteryUnlocked(mystery.id)) {
+    return res.status(403).json({
+      message: "Mystery is locked.",
+    });
+  }
+
   const state = ensureMysteryState(mystery.id);
+
   return res.status(200).json(toPublicMystery(mystery, state));
 }
+
 
 /* ------------------------------------------------------------------ */
 /* POST /api/mysteries/:id/questions/:questionId/answer                */
@@ -145,6 +179,11 @@ export function submitAnswer(req, res) {
   const mystery = findMystery(req.params.id);
   if (!mystery) {
     return res.status(404).json({ message: "Mystery not found." });
+  }
+  if (!isMysteryUnlocked(mystery.id)) {
+    return res.status(403).json({
+      message: "Mystery is locked.",
+    });
   }
 
   // 4. Find question
@@ -233,7 +272,11 @@ export function requestHint(req, res) {
   if (!mystery) {
     return res.status(404).json({ message: "Mystery not found." });
   }
-
+  if (!isMysteryUnlocked(mystery.id)) {
+    return res.status(403).json({
+      message: "Mystery is locked.",
+    });
+  }
   // 3. Find question
   const question = findQuestion(mystery, req.params.questionId);
   if (!question) {
