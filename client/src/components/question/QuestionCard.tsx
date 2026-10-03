@@ -40,6 +40,8 @@ function QuestionCard({
     onSubmit(trimmedAnswer);
   };
 
+  const progress = (questionNumber / totalQuestions) * 100;
+
   return (
     <section className="question-card">
       <div className="question-card__header">
@@ -54,7 +56,7 @@ function QuestionCard({
         <div className="question-card__progress-bar">
           <span
             style={{
-              width: `${(questionNumber / totalQuestions) * 100}%`,
+              width: `${progress}%`,
             }}
           />
         </div>
@@ -85,7 +87,14 @@ function QuestionCard({
             disabled={!answer.trim() || isSubmitting}
             className="question-card__submit"
           >
-            {isSubmitting ? "Checking..." : "Submit Answer"}
+            {isSubmitting ? (
+              <>
+                <span className="question-card__spinner" />
+                Checking...
+              </>
+            ) : (
+              "Submit Answer"
+            )}
           </button>
         </form>
 
@@ -94,7 +103,11 @@ function QuestionCard({
             className={`question-card__feedback question-card__feedback--${feedback.type}`}
             role="alert"
           >
-            {feedback.message}
+            <span className="question-card__feedback-icon">
+              {feedback.type === "success" ? "✓" : "×"}
+            </span>
+
+            <span>{feedback.message}</span>
           </div>
         )}
       </div>

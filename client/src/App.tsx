@@ -2,8 +2,13 @@ import { useState } from "react";
 import "./styles/global.css";
 import QuestionCard from "./components/question/QuestionCard";
 import HintCard from "./components/hint/HintCard";
+import { useNotification } from "./context/NotificationContext";
 
 function App() {
+  const { showNotification } = useNotification();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [feedback, setFeedback] = useState<{
     type: "success" | "error" | null;
     message: string;
@@ -19,19 +24,38 @@ function App() {
   const [isHintLoading, setIsHintLoading] = useState(false);
 
   const handleSubmit = (answer: string) => {
-    if (answer.toLowerCase() === "shadow") {
-      setFeedback({
-        type: "success",
-        message: "Correct! You solved the clue.",
-      });
-
+    if (isSubmitting) {
       return;
     }
 
+    setIsSubmitting(true);
+
     setFeedback({
-      type: "error",
-      message: "Wrong answer. Try again.",
+      type: null,
+      message: "",
     });
+
+    // Temporary mock API delay.
+    // This will later be replaced with the real API call.
+    setTimeout(() => {
+      if (answer.toLowerCase() === "shadow") {
+        setFeedback({
+          type: "success",
+          message: "Correct! You solved the clue.",
+        });
+
+        showNotification("success", "Correct! You solved the clue.");
+      } else {
+        setFeedback({
+          type: "error",
+          message: "Wrong answer. Try again.",
+        });
+
+        showNotification("error", "Wrong answer. Try again.");
+      }
+
+      setIsSubmitting(false);
+    }, 1000);
   };
 
   const handleRequestHint = () => {
