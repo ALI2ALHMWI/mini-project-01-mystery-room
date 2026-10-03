@@ -14,8 +14,11 @@ export interface Question {
 export interface Mystery extends MysteryListItem {
   story: string
   questions: Question[]
-  finalReveal: string
-  nextMysteryId: string | null
+  currentQuestionId: number | null
+  completed: boolean
+  hintsUsed: Record<string, number>
+  finalReveal?: string
+  nextMysteryId?: string | null
 }
 
 export type AnswerResponse =

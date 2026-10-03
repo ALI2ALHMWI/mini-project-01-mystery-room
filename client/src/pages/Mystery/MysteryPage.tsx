@@ -14,6 +14,7 @@ export interface MysteryGameplayProps {
   feedback: { type: 'success' | 'error'; message: string } | null
   hint: HintResponse | null
   hintsRemaining: number
+  hintsUsed: number
   isSubmitting: boolean
   isRequestingHint: boolean
   submitAnswer: (answer: string) => Promise<void>
@@ -67,18 +68,26 @@ export default function MysteryPage({ children }: MysteryPageProps) {
       .then((loadedMystery) => {
         if (!isCurrentRequest) return
 
-        const firstQuestion = [...loadedMystery.questions].sort(
-          (left, right) => left.order - right.order,
-        )[0]
+        if (loadedMystery.completed) {
+          navigate(`/result/${encodeURIComponent(id)}`, { replace: true })
+          return
+        }
 
-        if (!firstQuestion) {
-          setLoadError('This mystery does not have any questions yet.')
+        const currentQuestion = loadedMystery.questions.find(
+          (item) => item.id === loadedMystery.currentQuestionId,
+        )
+
+        if (!currentQuestion) {
+          setLoadError('The current question is unavailable for this mystery.')
           return
         }
 
         setMystery(loadedMystery)
-        setQuestionId(firstQuestion.id)
-        setHintsRemaining(firstQuestion.maxHints)
+        setQuestionId(currentQuestion.id)
+        setHintsRemaining(
+          currentQuestion.maxHints -
+            (loadedMystery.hintsUsed[String(currentQuestion.id)] ?? 0),
+        )
       })
       .catch((error: unknown) => {
         if (isCurrentRequest) setLoadError(getErrorMessage(error))
@@ -90,7 +99,7 @@ export default function MysteryPage({ children }: MysteryPageProps) {
     return () => {
       isCurrentRequest = false
     }
-  }, [id])
+  }, [id, navigate])
 
   const orderedQuestions = mystery
     ? [...mystery.questions].sort((left, right) => left.order - right.order)
@@ -177,6 +186,7 @@ export default function MysteryPage({ children }: MysteryPageProps) {
     feedback,
     hint,
     hintsRemaining,
+    hintsUsed: question.maxHints - hintsRemaining,
     isSubmitting,
     isRequestingHint,
     submitAnswer,
@@ -199,7 +209,14 @@ export default function MysteryPage({ children }: MysteryPageProps) {
         <h2 id="mystery-question-heading">
           Question {question.order} of {orderedQuestions.length}
         </h2>
-        {children ? children(gameplay) : <p>{question.text}</p>}
+        {children ? (
+          children(gameplay)
+        ) : (
+          <>
+            <p>{question.text}</p>
+            <p>{gameplay.hintsUsed} hint(s) used</p>
+          </>
+        )}
         {feedback && <p role="status">{feedback.message}</p>}
         {actionError && <p role="alert">{actionError}</p>}
       </section>
