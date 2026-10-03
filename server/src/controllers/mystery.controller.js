@@ -60,7 +60,23 @@ function toPublicMystery(mystery, state) {
 
   return base;
 }
+function isMysteryUnlocked(mysteryId) {
+  const index = mysteries.findIndex((m) => m.id === mysteryId);
 
+  if (index === -1) {
+    return false;
+  }
+
+  // The first mystery is always unlocked.
+  if (index === 0) {
+    return true;
+  }
+
+  const previousMystery = mysteries[index - 1];
+  const previousState = gameState.mysteries[previousMystery.id];
+
+  return previousState?.completed === true;
+}
 /**
  * Public shape of a mystery list item (collection view).
  */
@@ -69,8 +85,10 @@ function toPublicMysteryListItem(mystery) {
     id: mystery.id,
     title: mystery.title,
     description: mystery.description,
+    unlocked: isMysteryUnlocked(mystery.id),
   };
 }
+
 
 /**
  * Lazily create runtime state for a mystery on first access.
@@ -92,6 +110,8 @@ function ensureMysteryState(mysteryId) {
   return gameState.mysteries[mysteryId];
 }
 
+
+
 /* ------------------------------------------------------------------ */
 /* GET /api/mysteries                                                  */
 /* ------------------------------------------------------------------ */
@@ -107,18 +127,28 @@ export function getMysteries(req, res) {
 
 export function getMysteryById(req, res) {
   const idCheck = validateRequiredId(req.params.id, "Mystery ID");
+
   if (!idCheck.valid) {
     return res.status(400).json({ message: idCheck.message });
   }
 
   const mystery = findMystery(req.params.id);
+
   if (!mystery) {
     return res.status(404).json({ message: "Mystery not found." });
   }
 
+  if (!isMysteryUnlocked(mystery.id)) {
+    return res.status(403).json({
+      message: "Mystery is locked.",
+    });
+  }
+
   const state = ensureMysteryState(mystery.id);
+
   return res.status(200).json(toPublicMystery(mystery, state));
 }
+
 
 /* ------------------------------------------------------------------ */
 /* POST /api/mysteries/:id/questions/:questionId/answer                */
