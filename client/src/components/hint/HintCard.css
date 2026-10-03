@@ -1,0 +1,146 @@
+.hint-card {
+  width: 100%;
+
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+/* =========================
+   Header
+   ========================= */
+
+.hint-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+
+  padding: var(--space-5) var(--space-6);
+
+  background: var(--color-surface-light);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.hint-card__label {
+  display: block;
+
+  margin-bottom: var(--space-1);
+
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hint-card__title {
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.hint-card__counter {
+  flex-shrink: 0;
+
+  padding: var(--space-2) var(--space-3);
+
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* =========================
+   Content
+   ========================= */
+
+.hint-card__content {
+  padding: var(--space-6);
+}
+
+.hint-card__text,
+.hint-card__empty {
+  margin: 0 0 var(--space-5);
+
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
+}
+
+.hint-card__text {
+  color: var(--color-text);
+}
+
+.hint-card__empty {
+  color: var(--color-text-muted);
+}
+
+/* =========================
+   Button
+   ========================= */
+
+.hint-card__button {
+  width: 100%;
+  min-height: 46px;
+
+  background: transparent;
+  border: 1px solid var(--color-primary);
+
+  color: var(--color-primary);
+
+  font-size: var(--font-size-md);
+}
+
+.hint-card__button:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.hint-card__button:disabled {
+  background: var(--color-surface-light);
+  border-color: var(--color-border);
+
+  color: var(--color-text-muted);
+
+  opacity: 0.7;
+}
+
+/* =========================
+   Remaining Hints
+   ========================= */
+
+.hint-card__remaining {
+  margin-top: var(--space-3);
+
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  text-align: center;
+}
+
+/* =========================
+   Mobile
+   ========================= */
+
+@media (max-width: 768px) {
+  .hint-card__header {
+    padding: var(--space-4);
+  }
+
+  .hint-card__content {
+    padding: var(--space-5);
+  }
+
+  .hint-card__title {
+    font-size: var(--font-size-lg);
+  }
+
+  .hint-card__counter {
+    font-size: var(--font-size-xs);
+  }
+}
