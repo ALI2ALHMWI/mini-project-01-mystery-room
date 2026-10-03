@@ -1,6 +1,6 @@
 // server/src/controllers/mystery.controller.js
 
-import mysteries from "../data/mysteries.js";
+import mysteries  from "../data/mysteries.js";
 import gameState from "../data/gameState.js";
 import {
   validateAnswerRequest,
@@ -19,6 +19,7 @@ function findMystery(mysteryId) {
 }
 
 function findQuestion(mystery, questionId) {
+  // questionId arrives from URL params as a string, but our data uses numbers.
   const numericId = Number(questionId);
   return mystery.questions.find((q) => q.id === numericId);
 }
@@ -42,7 +43,6 @@ function toPublicQuestion(question) {
 /**
  * Public shape of a mystery.
  * Reveal fields are only included after the mystery is completed.
- * Game-state fields are safe to expose (no answers, no hint text).
  */
 function toPublicMystery(mystery, state) {
   const base = {
@@ -51,14 +51,8 @@ function toPublicMystery(mystery, state) {
     description: mystery.description,
     story: mystery.story,
     questions: getOrderedQuestions(mystery).map(toPublicQuestion),
-
-    // Expose game state so the frontend survives a page refresh
-    currentQuestionId: state?.currentQuestionId ?? null,
-    completed: state?.completed ?? false,
-    hintsUsed: { ...(state?.hintsUsed ?? {}) }, // copy, never leak the live object
   };
 
-  // Reveal only after completion
   if (state && state.completed) {
     base.finalReveal = mystery.finalReveal;
     base.nextMysteryId = mystery.nextMysteryId ?? null;
@@ -131,11 +125,13 @@ export function getMysteryById(req, res) {
 /* ------------------------------------------------------------------ */
 
 export function submitAnswer(req, res) {
+  // 1. Validate body
   const bodyCheck = validateAnswerRequest(req.body);
   if (!bodyCheck.valid) {
     return res.status(400).json({ message: bodyCheck.message });
   }
 
+  // 2. Validate params
   const idCheck = validateRequiredId(req.params.id, "Mystery ID");
   if (!idCheck.valid) {
     return res.status(400).json({ message: idCheck.message });
@@ -145,30 +141,36 @@ export function submitAnswer(req, res) {
     return res.status(400).json({ message: qIdCheck.message });
   }
 
+  // 3. Find mystery
   const mystery = findMystery(req.params.id);
   if (!mystery) {
     return res.status(404).json({ message: "Mystery not found." });
   }
 
+  // 4. Find question
   const question = findQuestion(mystery, req.params.questionId);
   if (!question) {
     return res.status(404).json({ message: "Question not found." });
   }
 
+  // 5. Get runtime state
   const state = ensureMysteryState(mystery.id);
 
+  // 6. Mystery already completed
   if (state.completed) {
     return res.status(400).json({
       message: "Mystery has already been completed.",
     });
   }
 
+  // 7. Must be the current question (no skipping)
   if (question.id !== state.currentQuestionId) {
     return res.status(400).json({
       message: "This question is not currently available.",
     });
   }
 
+  // 8. Check answer
   const isCorrect = checkAnswer(req.body.answer, question.answer);
 
   if (!isCorrect) {
@@ -178,6 +180,7 @@ export function submitAnswer(req, res) {
     });
   }
 
+  // 9. Correct answer: update state
   if (!state.solvedQuestionIds.includes(question.id)) {
     state.solvedQuestionIds.push(question.id);
   }
@@ -186,6 +189,7 @@ export function submitAnswer(req, res) {
   const currentIndex = ordered.findIndex((q) => q.id === question.id);
   const nextQuestion = ordered[currentIndex + 1];
 
+  // 10. More questions remain
   if (nextQuestion) {
     state.currentQuestionId = nextQuestion.id;
     return res.status(200).json({
@@ -196,6 +200,7 @@ export function submitAnswer(req, res) {
     });
   }
 
+  // 11. Final question: complete the mystery
   state.completed = true;
   state.currentQuestionId = null;
 
@@ -213,6 +218,7 @@ export function submitAnswer(req, res) {
 /* ------------------------------------------------------------------ */
 
 export function requestHint(req, res) {
+  // 1. Validate params
   const idCheck = validateRequiredId(req.params.id, "Mystery ID");
   if (!idCheck.valid) {
     return res.status(400).json({ message: idCheck.message });
@@ -222,35 +228,42 @@ export function requestHint(req, res) {
     return res.status(400).json({ message: qIdCheck.message });
   }
 
+  // 2. Find mystery
   const mystery = findMystery(req.params.id);
   if (!mystery) {
     return res.status(404).json({ message: "Mystery not found." });
   }
 
+  // 3. Find question
   const question = findQuestion(mystery, req.params.questionId);
   if (!question) {
     return res.status(404).json({ message: "Question not found." });
   }
 
+  // 4. Get runtime state
   const state = ensureMysteryState(mystery.id);
 
+  // 5. Mystery already completed
   if (state.completed) {
     return res.status(400).json({
       message: "Mystery has already been completed.",
     });
   }
 
+  // 6. Must be the current question
   if (question.id !== state.currentQuestionId) {
     return res.status(400).json({
       message: "This question is not currently available.",
     });
   }
 
+  // 7. Check hint usage
   const used = state.hintsUsed[question.id] ?? 0;
   if (used >= MAX_HINTS) {
     return res.status(400).json({ message: "No hints remaining." });
   }
 
+  // 8. Return next hint and update usage
   const hint = question.hints[used];
   state.hintsUsed[question.id] = used + 1;
 

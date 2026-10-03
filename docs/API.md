@@ -87,15 +87,17 @@ The collection response must not expose:
 - Internal runtime state
 
 ---
+
 # 5. GET /api/mysteries/:id
 
-Returns one specific mystery, including the current game state.
-
+Returns one specific mystery.
 
 ## Request
 
 ```http
 GET /api/mysteries/mystery-1
+```
+
 ## Success Response
 
 Status:
