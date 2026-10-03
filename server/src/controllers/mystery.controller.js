@@ -51,9 +51,13 @@ function toPublicMystery(mystery, state) {
     description: mystery.description,
     story: mystery.story,
     questions: getOrderedQuestions(mystery).map(toPublicQuestion),
+
+    currentQuestionId: state?.currentQuestionId ?? null,
+    completed: state?.completed ?? false,
+    hintsUsed: state?.hintsUsed ?? {},
   };
 
-  if (state && state.completed) {
+  if (state?.completed) {
     base.finalReveal = mystery.finalReveal;
     base.nextMysteryId = mystery.nextMysteryId ?? null;
   }
@@ -176,6 +180,11 @@ export function submitAnswer(req, res) {
   if (!mystery) {
     return res.status(404).json({ message: "Mystery not found." });
   }
+  if (!isMysteryUnlocked(mystery.id)) {
+    return res.status(403).json({
+      message: "Mystery is locked.",
+    });
+  }
 
   // 4. Find question
   const question = findQuestion(mystery, req.params.questionId);
@@ -263,7 +272,11 @@ export function requestHint(req, res) {
   if (!mystery) {
     return res.status(404).json({ message: "Mystery not found." });
   }
-
+  if (!isMysteryUnlocked(mystery.id)) {
+    return res.status(403).json({
+      message: "Mystery is locked.",
+    });
+  }
   // 3. Find question
   const question = findQuestion(mystery, req.params.questionId);
   if (!question) {

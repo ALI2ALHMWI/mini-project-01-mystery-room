@@ -1,9 +1,10 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import "./QuestionCard.css";
 
 type FeedbackType = "success" | "error" | null;
 
 interface QuestionCardProps {
+  questionId: number;
   questionNumber: number;
   totalQuestions: number;
   question: string;
@@ -16,6 +17,7 @@ interface QuestionCardProps {
 }
 
 function QuestionCard({
+  questionId,
   questionNumber,
   totalQuestions,
   question,
@@ -27,6 +29,10 @@ function QuestionCard({
   },
 }: QuestionCardProps) {
   const [answer, setAnswer] = useState("");
+
+  useEffect(() => {
+    setAnswer("");
+  }, [questionId]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
