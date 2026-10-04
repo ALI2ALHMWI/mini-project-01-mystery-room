@@ -139,12 +139,8 @@ export default function MysteryPage() {
       }
       showNotification("success", result.message);
       if (result.mysteryCompleted) {
-        navigate(`/result/${encodeURIComponent(id)}`, {
-          state: {
-            finalReveal: result.finalReveal,
-            nextMysteryId: result.nextMysteryId,
-          },
-        });
+       navigate(`/result/${encodeURIComponent(id)}`);
+
         return;
       }
 

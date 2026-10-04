@@ -2,9 +2,18 @@
 
 ## 1. Overview
 
-The Mystery Room backend provides the API used by the React frontend to load mysteries, submit answers, progress through questions, and request hints.
+The Mystery Room backend provides the API used by the React frontend to load mysteries, submit free-text answers, progress through questions, request hints, and unlock the next mystery.
 
-The backend is the source of truth for the actual mystery state.
+The backend is the source of truth for:
+
+- Correct answers.
+- Question order.
+- Hint usage.
+- Mystery completion.
+- Mystery locking and unlocking.
+- Final reveals.
+
+The frontend must never receive hidden solution data before it is needed.
 
 The API uses:
 
@@ -14,11 +23,11 @@ Express
 In-memory runtime state
 ```
 
-There is no database.
+There is no database, authentication, session, cookie, or user account requirement in this project.
 
 ---
 
-# 2. Base URL
+## 2. Base URL
 
 During local development:
 
@@ -32,7 +41,7 @@ API base path:
 /api
 ```
 
-Therefore, all mystery endpoints start with:
+All mystery endpoints start with:
 
 ```text
 /api/mysteries
@@ -40,20 +49,43 @@ Therefore, all mystery endpoints start with:
 
 ---
 
-# 3. API Endpoints
+## 3. Endpoints
 
-| Method | Endpoint                                          | Purpose                 |
-| ------ | ------------------------------------------------- | ----------------------- |
-| GET    | `/api/mysteries`                                  | Get available mysteries |
-| GET    | `/api/mysteries/:id`                              | Get one mystery         |
-| POST   | `/api/mysteries/:id/questions/:questionId/answer` | Submit an answer        |
-| PATCH  | `/api/mysteries/:id/questions/:questionId/hint`   | Request the next hint   |
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/mysteries` | Get mystery cards and unlock status |
+| GET | `/api/mysteries/:id` | Get one unlocked mystery and current public gameplay state |
+| POST | `/api/mysteries/:id/questions/:questionId/answer` | Submit one free-text answer |
+| PATCH | `/api/mysteries/:id/questions/:questionId/hint` | Request the next hint |
 
 ---
 
-# 4. GET /api/mysteries
+## 4. Answer Input Rule
 
-Returns the available mysteries.
+The player answer is always entered as free text.
+
+The frontend must send:
+
+```json
+{
+  "answer": "player typed answer"
+}
+```
+
+The question response must not include:
+
+- `options`.
+- `choices`.
+- `answer`.
+- Any field that reveals the correct answer.
+
+The UI must use a normal text input. This API does not support multiple-choice answer submission.
+
+---
+
+# 5. GET `/api/mysteries`
+
+Returns the available mystery cards and whether each mystery is currently unlocked.
 
 ## Request
 
@@ -61,36 +93,49 @@ Returns the available mysteries.
 GET /api/mysteries
 ```
 
-## Response
+## Success Response
+
+Status:
+
+```text
+200 OK
+```
+
+Example:
 
 ```json
 [
   {
     "id": "mystery-1",
     "title": "The Missing Key",
-    "description": "A temporary mystery used for API testing."
+    "description": "A temporary mystery used for API testing.",
+    "unlocked": true
   },
   {
     "id": "mystery-2",
     "title": "The Silent Library",
-    "description": "A second temporary mystery used for API testing."
+    "description": "A second temporary mystery used for API testing.",
+    "unlocked": false
   }
 ]
 ```
 
-## Important
+## Information restrictions
 
 The collection response must not expose:
 
-- Correct answers
-- Hint text
-- Internal runtime state
+- Correct answers.
+- Hint text.
+- Final reveal text.
+- Internal runtime state.
+
+The first mystery is unlocked by default. Later mysteries become unlocked after the previous mystery is completed.
 
 ---
 
-# 5. GET /api/mysteries/:id
+# 6. GET `/api/mysteries/:id`
 
-Returns one specific mystery.
+Returns one unlocked mystery with its public story, question data, and current gameplay state.
 
 ## Request
 
@@ -126,42 +171,41 @@ Example:
       "order": 2,
       "text": "What can open something that is locked?",
       "maxHints": 2
-    },
-    {
-      "id": 3,
-      "order": 3,
-      "text": "What do you pass through to enter another room?",
-      "maxHints": 2
     }
   ],
-  "finalReveal": "You discovered the hidden key and escaped the room.",
-  "nextMysteryId": "mystery-2"
+  "currentQuestionId": 1,
+  "completed": false,
+  "hintsUsed": {}
 }
 ```
 
-## Important
+## Public question contract
 
-The response must **not** expose:
+Each public question contains only:
+
+```text
+id
+order
+text
+maxHints
+```
+
+It must not contain:
 
 ```text
 answer
+hints
+options
+choices
 ```
 
-or:
-
-```text
-hint text
-```
-
-The frontend only receives the question information and the maximum number of hints.
-
-The actual hint text is revealed only through the hint endpoint.
+`finalReveal` and `nextMysteryId` are returned only after the mystery is completed.
 
 ---
 
-# 6. GET /api/mysteries/:id — Not Found
+## 6.1 Mystery Not Found
 
-If the mystery does not exist:
+Request:
 
 ```http
 GET /api/mysteries/not-found
@@ -169,13 +213,9 @@ GET /api/mysteries/not-found
 
 Response:
 
-Status:
-
 ```text
 404 Not Found
 ```
-
-Body:
 
 ```json
 {
@@ -183,27 +223,32 @@ Body:
 }
 ```
 
-The API must not return:
+## 6.2 Mystery Locked
+
+If the mystery exists but is not unlocked:
 
 ```text
-200
+403 Forbidden
 ```
 
-with an empty or null mystery.
+```json
+{
+  "message": "Mystery is locked."
+}
+```
 
 ---
 
-# 7. POST /api/mysteries/:id/questions/:questionId/answer
+# 7. POST `/api/mysteries/:id/questions/:questionId/answer`
 
-Submits the player's answer for the current question.
+Submits the player's free-text answer for the currently active question.
 
 ## Request
 
 ```http
 POST /api/mysteries/mystery-1/questions/1/answer
+Content-Type: application/json
 ```
-
-Body:
 
 ```json
 {
@@ -211,30 +256,31 @@ Body:
 }
 ```
 
+The answer value must be a string. The client may trim whitespace before sending, but the backend must also normalize safely.
+
 ---
 
 # 8. Answer Rules
 
-The backend is responsible for checking the answer.
+Answers are case-insensitive and should ignore leading and trailing whitespace.
 
-Answers are case-insensitive.
-
-These should all be treated as the same answer:
+These values represent the same answer:
 
 ```text
 shadow
 Shadow
 SHADOW
 sHaDoW
+  shadow  
 ```
 
-Leading/trailing whitespace should also be handled appropriately.
+The backend performs the final comparison. The frontend must not contain the correct answer or duplicate the answer-checking logic.
 
 ---
 
-# 9. Correct Answer
+# 9. Correct Answer with More Questions
 
-If the answer is correct and there are more questions:
+If the answer is correct and more questions remain:
 
 Status:
 
@@ -253,11 +299,11 @@ Response:
 }
 ```
 
-The backend updates the runtime state so that Question 2 becomes the current question.
+The backend updates runtime state so Question 2 becomes current.
 
 ---
 
-# 10. Correct Answer — Mystery Completed
+# 10. Correct Answer Completing a Mystery
 
 If the player correctly answers the final question:
 
@@ -279,7 +325,7 @@ Response:
 }
 ```
 
-If there is no next mystery:
+If no mystery remains:
 
 ```json
 {
@@ -291,13 +337,13 @@ If there is no next mystery:
 }
 ```
 
+The frontend may navigate to the result page after receiving this response.
+
 ---
 
 # 11. Wrong Answer
 
-A wrong answer is a valid gameplay result.
-
-It is therefore **not** a `400` error.
+A wrong answer is a valid gameplay result, not a request error.
 
 Status:
 
@@ -316,15 +362,11 @@ Response:
 
 The current question does not change.
 
-The player remains on the same question.
-
 ---
 
-# 12. Invalid Answer
+# 12. Invalid Answer Request
 
-The backend must validate the request body.
-
-Invalid examples include:
+The following are invalid:
 
 ### Missing answer
 
@@ -348,7 +390,7 @@ Invalid examples include:
 }
 ```
 
-### Whitespace only
+### Whitespace-only string
 
 ```json
 {
@@ -356,15 +398,11 @@ Invalid examples include:
 }
 ```
 
-These should return:
-
-Status:
+Response:
 
 ```text
 400 Bad Request
 ```
-
-Example response:
 
 ```json
 {
@@ -388,8 +426,6 @@ Response:
 404 Not Found
 ```
 
-Example:
-
 ```json
 {
   "message": "Question not found."
@@ -400,29 +436,13 @@ Example:
 
 # 14. Question Order
 
-Questions must be solved in order.
+Questions must be answered in order.
 
-Example:
-
-```text
-Question 1
-    ↓
-Question 2
-    ↓
-Question 3
-```
-
-The player cannot submit an answer for Question 3 while Question 1 is still active.
-
-If the player attempts to answer a question that is not currently available:
-
-Status:
+If Question 1 is active, submitting an answer for Question 2 is invalid:
 
 ```text
 400 Bad Request
 ```
-
-Response:
 
 ```json
 {
@@ -430,11 +450,13 @@ Response:
 }
 ```
 
+The frontend must render only the current question, but the backend must enforce this rule independently.
+
 ---
 
-# 15. PATCH /api/mysteries/:id/questions/:questionId/hint
+# 15. PATCH `/api/mysteries/:id/questions/:questionId/hint`
 
-Requests the next available hint for the current question.
+Requests the next available hint for the currently active question.
 
 ## Request
 
@@ -444,19 +466,11 @@ PATCH /api/mysteries/mystery-1/questions/1/hint
 
 No request body is required.
 
----
-
-# 16. First Hint
-
-The first request returns the first hint.
-
-Status:
+## First Hint
 
 ```text
 200 OK
 ```
-
-Example:
 
 ```json
 {
@@ -465,19 +479,11 @@ Example:
 }
 ```
 
----
-
-# 17. Second Hint
-
-The second request returns the second hint.
-
-Status:
+## Second Hint
 
 ```text
 200 OK
 ```
-
-Example:
 
 ```json
 {
@@ -486,21 +492,19 @@ Example:
 }
 ```
 
+The frontend must display only the hint returned by this endpoint.
+
 ---
 
-# 18. Third Hint
+# 16. Hint Errors
 
 Each question allows a maximum of two hints.
 
-A third request is invalid.
-
-Status:
+A third request returns:
 
 ```text
 400 Bad Request
 ```
-
-Response:
 
 ```json
 {
@@ -508,21 +512,7 @@ Response:
 }
 ```
 
----
-
-# 19. Hint for Wrong Question
-
-A player can only request a hint for the currently active question.
-
-For example, if Question 1 is active:
-
-```http
-PATCH /api/mysteries/mystery-1/questions/2/hint
-```
-
-is invalid.
-
-Response:
+A hint for a non-current question returns:
 
 ```text
 400 Bad Request
@@ -534,19 +524,11 @@ Response:
 }
 ```
 
----
-
-# 20. Hint After Mystery Completion
-
-If the mystery has already been completed, another hint cannot be requested.
-
-Status:
+A hint after completion returns:
 
 ```text
 400 Bad Request
 ```
-
-Response:
 
 ```json
 {
@@ -556,11 +538,9 @@ Response:
 
 ---
 
-# 21. Runtime State
+# 17. Runtime State
 
-The backend keeps gameplay state separately from the static mystery data.
-
-Example:
+Runtime state is separate from static mystery data.
 
 ```text
 gameState
@@ -591,7 +571,7 @@ Example:
 
 ---
 
-# 22. Static Data vs Runtime State
+# 18. Static Data vs Runtime State
 
 Static mystery data contains:
 
@@ -616,135 +596,132 @@ hintsUsed
 completed
 ```
 
-These should remain separate.
-
-The backend's static data is the source for mystery content.
-
-The runtime state is the source of truth for current gameplay progress.
+Correct answers and actual hint text remain backend-only until the appropriate action occurs.
 
 ---
 
-# 23. API Security / Information Exposure
+# 19. Information Exposure Rules
 
-The frontend must never receive the correct answer as part of the normal mystery response.
-
-The frontend must also not receive all hint text before requesting hints.
-
-Therefore:
+The safe gameplay sequence is:
 
 ```text
 GET mystery
       ↓
-Question information only
+Public question text only
       ↓
-Player requests hint
+Player types a free-text answer
+      ↓
+POST answer
+      ↓
+Correct or wrong result
+      ↓
+Player requests a hint if needed
       ↓
 PATCH hint
       ↓
 One hint returned
 ```
 
-This prevents the frontend from knowing the solution before the player actually interacts with the game.
+The normal mystery response must not contain the answer, hint arrays, answer options, or final reveal before completion.
 
 ---
 
-# 24. Frontend API Layer
+# 20. Frontend API Layer
 
-All API calls from React should go through:
+All React requests go through:
 
 ```text
 client/src/services/api.ts
 ```
 
-Components should not contain scattered direct `fetch()` calls.
+Required functions:
 
-Example structure:
-
-```text
-components/pages
-       ↓
-services/api.ts
-       ↓
-Express API
-```
-
-The API layer should expose named functions that match the application's needs.
-
-For example:
-
-```text
+```ts
 getMysteries()
 getMysteryById(id)
 submitAnswer(mysteryId, questionId, answer)
 requestHint(mysteryId, questionId)
 ```
 
-The exact implementation belongs to the frontend team.
+`submitAnswer` accepts a string:
+
+```ts
+submitAnswer(
+  mysteryId: string,
+  questionId: number,
+  answer: string,
+): Promise<AnswerResponse>
+```
+
+The service is responsible for:
+
+- Building URLs.
+- Encoding route IDs.
+- Sending JSON for answer requests.
+- Parsing JSON.
+- Converting non-2xx responses into `ApiError`.
+- Returning typed response data.
+
+Components must not call `fetch` directly.
 
 ---
 
-# 25. Error Handling
+# 21. Error Handling Contract
 
-The frontend must handle:
-
-```text
-200
-400
-404
-```
-
-without crashing.
-
-Examples:
+The frontend must handle at least:
 
 ```text
-400 → Show a useful validation/gameplay message
-404 → Show that the mystery/question could not be found
-Network error → Show a useful error state and recovery option where appropriate
+200 → Render the gameplay result.
+400 → Show validation or gameplay feedback.
+403 → Show that the mystery is locked.
+404 → Show that the mystery or question was not found.
+500/network failure → Show a recoverable error state.
 ```
 
-The user should never see a blank page because an API request failed.
+The user should never see a blank page because of an API failure.
 
 ---
 
-# 26. Independent API Testing
+# 22. Independent API Testing
 
-The backend must be testable without the React frontend.
+Test the backend without the React frontend using curl, Postman, or Thunder Client.
 
-Use one of:
-
-- Postman
-- Thunder Client
-- curl
-
-At minimum, test:
+Minimum test cases:
 
 ```text
 GET collection
-GET valid mystery
+GET valid unlocked mystery
 GET invalid mystery
-POST correct answer
-POST wrong answer
-POST invalid answer
+GET locked mystery
+POST correct free-text answer
+POST wrong free-text answer
+POST answer with different casing
+POST answer with surrounding whitespace
+POST missing answer
+POST non-string answer
+POST empty answer
 POST wrong question order
 PATCH first hint
 PATCH second hint
 PATCH third hint
+PATCH hint for wrong question
 PATCH invalid question
+POST after mystery completion
 ```
 
 ---
 
-# 27. API Contract Rule
+# 23. Contract Change Rule
 
-The frontend and backend team must follow this document.
-
-If an endpoint or response shape needs to change:
+If an endpoint or response shape changes:
 
 1. Discuss the change with the team.
-2. Update `API.md`.
-3. Update the backend.
-4. Update the frontend API layer.
-5. Test the changed behavior.
+2. Update this `API.md`.
+3. Update the backend implementation.
+4. Update `client/src/services/api.ts`.
+5. Update `client/src/types/mystery.types.ts`.
+6. Update the relevant task and structure documentation.
+7. Run independent endpoint tests.
+8. Run the frontend lint and build checks.
 
-Do not silently change an API response and expect the other side to discover the change later.
+Do not silently change an API response and expect the other side to discover it later.
