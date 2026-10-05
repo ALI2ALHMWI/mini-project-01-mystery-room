@@ -1,10 +1,10 @@
+import { Link } from "react-router-dom";
+
 import libraryImage from "../../assets/generated/room-library.jpg";
 import secretPassageImage from "../../assets/generated/room-secret-passage.jpg";
 import hiddenChamberImage from "../../assets/generated/room-hidden-chamber.jpg";
 
 import "./RoomHero.css";
-
-
 
 interface RoomHeroProps {
   mysteryId: string;
@@ -36,7 +36,6 @@ function RoomHero({
       ? Math.round(((questionNumber - 1) / totalQuestions) * 100)
       : 0;
 
-  
 
   return (
     <section className="room-hero">
@@ -61,13 +60,13 @@ function RoomHero({
           <p>{story}</p>
         </div>
 
-        <a
+        <Link
           className="room-hero__explore"
-          href={`/mystery/${encodeURIComponent(mysteryId)}/explore`}
+          to={`/mystery/${encodeURIComponent(mysteryId)}/explore`}
         >
           Explore the Room
           <span aria-hidden="true">→</span>
-        </a>
+        </Link>
 
         <div className="room-hero__progress">
           <div className="room-hero__progress-header">
