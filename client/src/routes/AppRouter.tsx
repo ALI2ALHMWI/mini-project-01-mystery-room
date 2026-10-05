@@ -5,6 +5,7 @@ import Home from "../pages/Home";
 import HowToPlay from "../pages/HowToPlay";
 import Result from "../pages/Result";
 import MysteryPage from "../pages/Mystery/MysteryPage";
+import MysteryIntroPage from "../pages/Mystery/MysteryIntroPage";
 import About from "../pages/About";
 import Settings from "../pages/Settings";
 import NotFound from "../pages/NotFound";
@@ -20,6 +21,7 @@ function AppRouter() {
         <Route path="/about" element={<About />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/result/:id" element={<Result />} />
+        <Route path="/mystery/:id/explore" element={<MysteryIntroPage />} />
         <Route path="/mystery/:id" element={<MysteryPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

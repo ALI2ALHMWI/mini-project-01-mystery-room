@@ -1,0 +1,195 @@
+.mystery-intro {
+  min-height: calc(100vh - 76px);
+  padding: clamp(32px, 6vw, 72px) 0;
+}
+
+.mystery-intro__container {
+  max-width: var(--container-xl);
+}
+
+.mystery-intro__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.mystery-intro__breadcrumb a:hover {
+  color: var(--color-primary);
+}
+
+.mystery-intro__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+}
+
+.mystery-intro__content,
+.mystery-intro__story {
+  padding: clamp(28px, 5vw, 56px);
+  background: linear-gradient(180deg, rgba(16, 41, 67, 0.98), rgba(7, 19, 33, 0.98));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.mystery-intro__content {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mystery-intro__eyebrow,
+.mystery-intro__story-label {
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mystery-intro h1 {
+  margin-top: var(--space-3);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: clamp(44px, 7vw, 76px);
+  line-height: 1;
+}
+
+.mystery-intro__description {
+  max-width: 650px;
+  margin-top: var(--space-6);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+.mystery-intro__stats {
+  display: flex;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+}
+
+.mystery-intro__stats div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.mystery-intro__stats strong {
+  color: var(--color-text);
+  font-size: var(--font-size-2xl);
+}
+
+.mystery-intro__stats span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mystery-intro__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-10);
+}
+
+.mystery-intro__start,
+.mystery-intro__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 50px;
+  padding: 13px 24px;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.mystery-intro__start {
+  background: var(--color-primary);
+  color: var(--color-bg-deep);
+}
+
+.mystery-intro__start:hover {
+  background: var(--color-primary-hover);
+  box-shadow: var(--shadow-gold);
+}
+
+.mystery-intro__back {
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-muted);
+}
+
+.mystery-intro__back:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.mystery-intro__story {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mystery-intro__story h2 {
+  margin-top: var(--space-3);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 42px);
+}
+
+.mystery-intro__story p {
+  margin-top: var(--space-6);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
+}
+
+.mystery-intro__error {
+  padding: var(--space-6);
+  color: var(--color-danger);
+  background: var(--color-surface);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 800px) {
+  .mystery-intro__hero {
+    grid-template-columns: 1fr;
+  }
+
+  .mystery-intro__content {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 540px) {
+  .mystery-intro {
+    padding: var(--space-6) 0;
+  }
+
+  .mystery-intro__content,
+  .mystery-intro__story {
+    padding: var(--space-6);
+  }
+
+  .mystery-intro__stats {
+    gap: var(--space-5);
+  }
+
+  .mystery-intro__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mystery-intro__start,
+  .mystery-intro__back {
+    width: 100%;
+  }
+}
