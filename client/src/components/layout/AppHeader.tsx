@@ -49,11 +49,18 @@ function AppHeader() {
           >
             About
           </NavLink>
-        </nav>
 
-        <button className="app-header__login" type="button">
-          Login
-        </button>
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              `app-navigation__link ${
+                isActive ? "app-navigation__link--active" : ""
+              }`
+            }
+          >
+            Settings
+          </NavLink>
+        </nav>
 
         <button
           className="app-header__menu"
