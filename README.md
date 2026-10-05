@@ -1,495 +1,240 @@
 # Mini Project 01 — Mystery Room
 
-A browser-based interactive mystery experience built with React, TypeScript, Node.js, and Express.
+A browser-based interactive mystery game built with React, TypeScript, Node.js, and Express.
 
-The player enters a mystery, reads the story, investigates clues, answers questions, uses hints when needed, and progresses through the mystery until reaching the final reveal.
+Players enter a mystery, read the story, inspect the clues, answer free-text questions, request hints when necessary, and progress through a sequence of mysteries. The backend controls the real gameplay state and keeps hidden answers and unrevealed hints private.
 
----
+## 1. Main Features
 
-# 1. Project Goal
+- Three connected mysteries with an English story and clue system.
+- Free-text answers instead of multiple-choice options.
+- Case-insensitive answer checking with surrounding whitespace ignored.
+- Questions must be solved in order.
+- Maximum of two hints per question.
+- Mystery locking and unlocking based on completion.
+- Final reveal only after the final question is solved.
+- Dedicated mystery exploration/introduction screen before gameplay.
+- Loading, API error, and network-failure states.
+- Responsive desktop and mobile UI.
+- React Router navigation.
+- In-memory backend state; no authentication or database is required.
 
-The goal of the project is to build a complete interactive mystery experience rather than a traditional CRUD or administration application.
-
-The application demonstrates:
-
-* React frontend development
-* TypeScript
-* React Router
-* React Hooks
-* Context API
-* REST API communication
-* Express routing
-* Controllers
-* Backend validation
-* In-memory runtime state
-* Frontend/backend integration
-* Error handling
-* Responsive UI
-* Git collaboration
-
----
-
-# 2. User Experience
-
-The main gameplay flow is:
+## 2. Gameplay Flow
 
 ```text
 Home
   ↓
-Start Mystery
+Mystery List
   ↓
-Read Story
+Explore Mystery
   ↓
-Inspect Clues
+Start Investigation
   ↓
-Answer Question
+Question 1
+  ↓
+Answer / Hint
   ↓
 Correct?
  ├── No → Retry
- │
- └── Yes
-      ↓
-   Next Question
-      ↓
-   Mystery Complete
-      ↓
-   Final Reveal
-      ↓
-   Next Mystery
-      ↓
-   Final Completion
+ └── Yes → Next Question
+              ↓
+          Final Question
+              ↓
+        Mystery Completed
+              ↓
+          Final Reveal
+              ↓
+        Next Mystery
 ```
 
-Questions must be solved in order.
+A player cannot skip the active question. The backend validates progression independently from the frontend.
 
-Each question has exactly one answer.
+## 3. Current Mysteries
 
-Answers are case-insensitive.
+| ID | Title | Theme | Next |
+| --- | --- | --- | --- |
+| mystery-1 | The Five O'Clock Coffee | Poison hidden in melting ice | mystery-2 |
+| mystery-2 | The Rainy Gallery | False alibi during a storm | mystery-3 |
+| mystery-3 | The Midnight Flight | Opportunity during a cabin blackout | None |
 
-Each question allows a maximum of two hints.
+The content is stored in `server/src/data/mysteries.js`. Correct answers, hint text, and final reveals are backend-only until the appropriate gameplay action.
 
----
+## 4. Technology Stack
 
-# 3. Technology Stack
+### Frontend
+- React
+- TypeScript
+- React Router
+- React Hooks
+- `useState`
+- `useEffect`
+- Context API
+- CSS
 
-## Frontend
+### Backend
+- Node.js
+- Express
+- JavaScript
+- ES Modules
+- Express Router
 
-* React
-* TypeScript
-* React Router
-* React Hooks
-* `useState`
-* `useEffect`
-* Context API
-* CSS
+### Development
+- Git
+- Feature branches
+- Pull Requests
 
-## Backend
-
-* Node.js
-* Express
-* JavaScript
-* ES Modules
-
-## Development
-
-* Git
-* Git branches
-* Pull Requests
-
----
-
-# 4. State Management
+## 5. State Management
 
 The project intentionally uses simple state management.
 
-## Local React State
-
-`useState` is used for local UI state such as:
-
-* answer input
-* loading state
-* UI errors
-* temporary feedback
-* hint display state
-
-## Context API
-
-Context is used only for genuinely shared application state.
-
-Currently the project uses:
+### Frontend
+API-driven pages use explicit React state:
 
 ```text
-NotificationContext
+useState
+  ↓
+load...()
+  ↓
+try / catch / finally
+  ↓
+useEffect()
+  ↓
+loading / error / data UI
 ```
 
-It is responsible for displaying notifications such as:
+Route-dependent pages reload when the mystery ID changes. The backend remains the source of truth for gameplay progression.
 
-```text
-Correct answer!
-```
+### Shared UI state
+`NotificationContext` is used for application-wide notifications.
 
-## Redux
+### Backend
+`server/src/data/gameState.js` stores temporary in-memory progression:
 
-Redux is **not used**.
+- current question
+- solved question IDs
+- hints used
+- completion state
 
-The project does not contain a Redux store or slices.
+Restarting the server resets this state.
 
-This keeps the architecture simple and avoids introducing global state where local state is sufficient.
-
-## Backend State
-
-The backend is the source of truth for the actual mystery progression.
-
-The backend controls:
-
-* current question
-* solved questions
-* correct answers
-* hint usage
-* mystery completion
-* final reveal
-* next mystery progression
-
----
-
-# 5. Project Structure
+## 6. Project Structure
 
 ```text
 Mini-Project-01/
-│
 ├── client/
 │   ├── src/
 │   │   ├── assets/
-│   │   │
 │   │   ├── components/
 │   │   │   ├── common/
+│   │   │   ├── layout/
 │   │   │   ├── mystery/
 │   │   │   ├── question/
-│   │   │   └── hint/
-│   │   │
+│   │   │   ├── hint/
+│   │   │   └── result/
 │   │   ├── pages/
 │   │   │   ├── Home/
 │   │   │   ├── HowToPlay/
 │   │   │   ├── Mystery/
-│   │   │   └── Result/
-│   │   │
+│   │   │   ├── Result/
+│   │   │   ├── About.tsx
+│   │   │   ├── Settings.tsx
+│   │   │   └── NotFound.tsx
 │   │   ├── routes/
-│   │   │   └── AppRouter.tsx
-│   │   │
 │   │   ├── context/
-│   │   │   └── NotificationContext.tsx
-│   │   │
-│   │   ├── hooks/
-│   │   │
 │   │   ├── services/
 │   │   │   └── api.ts
-│   │   │
 │   │   ├── types/
 │   │   │   └── mystery.types.ts
-│   │   │
 │   │   ├── styles/
-│   │   │
 │   │   ├── App.tsx
 │   │   └── main.tsx
-│   │
 │   └── package.json
-│
 ├── server/
 │   ├── src/
 │   │   ├── controllers/
-│   │   │   └── mystery.controller.js
-│   │   │
 │   │   ├── routes/
-│   │   │   └── mystery.routes.js
-│   │   │
 │   │   ├── data/
-│   │   │   ├── mysteries.js
-│   │   │   └── gameState.js
-│   │   │
-│   │   ├── utils/
-│   │   │   ├── validation.js
-│   │   │   └── answerChecker.js
-│   │   │
-│   │   ├── app.js
-│   │   └── server.js
-│   │
+│   │   └── utils/
 │   └── package.json
-│
 ├── docs/
-│   ├── PROJECT-STRUCTURE.md
 │   ├── API.md
+│   ├── PROJECT-STRUCTURE.md
 │   └── TASKS.md
-│
 ├── README.md
 └── .gitignore
 ```
 
-For a detailed explanation of the architecture, see:
+See `docs/PROJECT-STRUCTURE.md` for detailed responsibilities.
 
-```text
-docs/PROJECT-STRUCTURE.md
-```
+## 7. Frontend Routes
 
----
-
-# 6. Frontend Routes
-
-The application contains at least three meaningful routes and a dynamic mystery route.
-
-| Route          | Purpose           |
-| -------------- | ----------------- |
-| `/`            | Home              |
+| Route | Purpose |
+| --- | --- |
+| `/` | Home and mystery selection |
 | `/how-to-play` | Game instructions |
-| `/mystery/:id` | Mystery gameplay  |
-| `/result/:id`  | Completion/result |
+| `/mystery/:id/explore` | Mystery introduction and story |
+| `/mystery/:id` | Active mystery gameplay |
+| `/result/:id` | Completed mystery and final reveal |
+| `/about` | Project information |
+| `/settings` | Settings UI |
+| `*` | Not Found page |
 
-The mystery route uses the mystery ID from the URL.
+## 8. API
 
-Example:
-
-```text
-/mystery/mystery-1
-```
-
----
-
-# 7. API
-
-The frontend communicates with the backend through a single API helper:
+The frontend communicates with the backend through:
 
 ```text
 client/src/services/api.ts
 ```
 
-UI components should not make direct HTTP requests.
-
-## Endpoints
-
-### Get mysteries
+Available endpoints:
 
 ```http
-GET /api/mysteries
-```
-
-### Get a mystery
-
-```http
-GET /api/mysteries/:id
-```
-
-### Submit an answer
-
-```http
-POST /api/mysteries/:id/questions/:questionId/answer
-```
-
-Request:
-
-```json
-{
-  "answer": "shadow"
-}
-```
-
-### Request a hint
-
-```http
+GET   /api/mysteries
+GET   /api/mysteries/:id
+POST  /api/mysteries/:id/questions/:questionId/answer
 PATCH /api/mysteries/:id/questions/:questionId/hint
 ```
 
-For the complete API contract, see:
+For request and response contracts, see `docs/API.md`.
 
-```text
-docs/API.md
-```
+## 9. Information Exposure
 
----
+The frontend must never receive hidden solution data before it is needed.
 
-# 8. Game Rules
+A normal mystery response contains:
 
-## Answers
+- story
+- question text
+- question order
+- current question
+- hint usage count
+- completion status
 
-Each question has exactly one correct answer.
+It does not contain:
 
-Answers are case-insensitive.
+- correct answers
+- full hint arrays
+- final reveal before completion
 
-For example:
+The actual hint is returned only by the hint endpoint. The final reveal is returned only after the final answer is correct.
 
-```text
-shadow
-Shadow
-SHADOW
-sHaDoW
-```
+## 10. Error Handling
 
-are treated as the same answer.
+The API contract uses:
 
----
+- `200` for successful requests and wrong-answer gameplay results.
+- `400` for invalid input or invalid gameplay actions.
+- `403` for locked mysteries.
+- `404` for missing mysteries/questions/routes.
+- `500` for unexpected server errors.
+- Network errors are converted into a user-facing recoverable error by the frontend API layer.
 
-## Wrong Answers
+The UI must never fail into a blank page because of an API error.
 
-A wrong answer does not advance the game.
+## 11. Running the Project
 
-The player remains on the same question and can try again.
-
----
-
-## Question Order
-
-Questions must be solved in order.
-
-The player cannot skip a question.
-
-The backend validates the current question before accepting an answer.
-
----
-
-## Hints
-
-Each question has a maximum of two hints.
-
-The frontend does not contain the actual hint text.
-
-Hints are requested from the backend.
-
-After two hints have been used, another hint request is rejected.
-
----
-
-## Completion
-
-When the final question is answered correctly:
-
-1. the mystery becomes completed
-2. the final reveal is returned
-3. the next mystery can become available when one exists
-4. the player can continue to the next mystery
-
-When there are no more mysteries, the player reaches the final completion screen.
-
----
-
-# 9. Information Security Within the Game
-
-The frontend must not receive hidden solution information before it is needed.
-
-The mystery GET endpoint does not expose:
-
-* correct answers
-* actual hint text
-* final reveal
-
-The actual hint is returned only when the player requests a hint.
-
-The final reveal is returned only after the final answer has been correctly submitted.
-
-This keeps the backend as the source of truth for the mystery.
-
----
-
-# 10. Backend Architecture
-
-The backend follows a simple structure:
-
-```text
-Express Router
-      ↓
-Controller
-      ↓
-Validation / Answer Checker
-      ↓
-Static Mystery Data
-      +
-Runtime Game State
-```
-
-## Static Data
-
-Stored in:
-
-```text
-server/src/data/mysteries.js
-```
-
-Contains the mystery content and correct answers.
-
-## Runtime State
-
-Stored in:
-
-```text
-server/src/data/gameState.js
-```
-
-Contains temporary in-memory gameplay state.
-
-No database is used.
-
----
-
-# 11. Error Handling
-
-The API uses appropriate HTTP status codes.
-
-## `200`
-
-Used for successful requests and valid gameplay results.
-
-A wrong answer is a valid gameplay result and can therefore return:
-
-```text
-200
-```
-
-with:
-
-```json
-{
-  "correct": false
-}
-```
-
-## `400`
-
-Used for invalid requests or invalid gameplay actions.
-
-Examples:
-
-* missing answer
-* answer is not a string
-* empty answer
-* attempting to use a third hint
-* attempting an invalid gameplay action
-
-## `404`
-
-Used when the requested resource does not exist.
-
-Examples:
-
-* mystery not found
-* question not found
-
-The frontend must display useful error feedback instead of leaving the user with a blank screen.
-
----
-
-# 12. Running the Project
-
-The project contains two applications:
-
-```text
-client/
-server/
-```
-
-Both must be installed and run separately.
-
----
-
-## Backend
-
-Open a terminal:
+### Backend
 
 ```bash
 cd server
@@ -497,15 +242,15 @@ npm install
 npm run dev
 ```
 
-The backend uses Node.js with Express.
+Default backend URL:
 
-The exact development port is defined by the server configuration.
+```text
+http://localhost:5000
+```
 
----
+### Frontend
 
-## Frontend
-
-Open another terminal:
+Open a second terminal:
 
 ```bash
 cd client
@@ -513,264 +258,65 @@ npm install
 npm run dev
 ```
 
-The frontend development server will provide the local application URL.
-
----
-
-# 13. Development Rules
-
-All frontend API calls must go through:
+The Vite development server normally runs on:
 
 ```text
-client/src/services/api.ts
+http://localhost:5173
 ```
 
-Do not place API calls directly inside UI components.
+The frontend API base can be overridden with `VITE_API_BASE_URL`; otherwise it uses `/api`.
 
-The frontend should not contain the actual answers or hidden hint text.
+## 12. Development Rules
 
-The backend should remain the source of truth for gameplay progression.
+- Keep all frontend HTTP requests inside `services/api.ts`.
+- Keep data loading in API-driven pages using `useState`, `useEffect`, and explicit `load...` functions.
+- Keep presentational components focused on rendering and callbacks.
+- Do not expose answers or unrevealed hints in frontend data.
+- Keep gameplay progression backend-driven.
+- Do not add unnecessary architecture or libraries.
+- Do not push directly to `main`; use a feature branch and Pull Request.
 
-Do not add unnecessary architecture or libraries.
+## 13. Intentionally Out of Scope
 
----
+The project does not require:
 
-# 14. Forbidden Technologies
+- Redux
+- React Query / RTK Query
+- Database
+- Authentication
+- JWT
+- Sessions or cookies
+- GraphQL
+- WebSockets
+- Redis
+- Docker
+- Service/repository/DI layers
 
-The project intentionally does not use:
+The goal is a clear React + Express implementation with simple state management.
 
-* Redux
-* React Query
-* RTK Query
-* `createAsyncThunk`
-* databases
-* authentication
-* JWT
-* sessions
-* cookies
-* GraphQL
-* WebSockets
-* Redis
-* Docker
-* validation libraries
-* complex error middleware
-* service/repository layers
-* dependency injection
+## 14. Documentation
 
-The goal is to demonstrate the required React and Express concepts without unnecessary complexity.
+- `docs/API.md` — endpoint and data contract.
+- `docs/PROJECT-STRUCTURE.md` — actual project architecture and responsibilities.
+- `docs/TASKS.md` — team ownership, workflow, and completion criteria.
 
----
+## 15. QA Checklist
 
-# 15. Git Workflow
+Before submission, verify:
 
-Each team member works on a separate feature branch.
-
-Before starting work:
-
-```bash
-git checkout main
-git pull origin main
-```
-
-Create a branch:
-
-```bash
-git checkout -b feature/your-task-name
-```
-
-Examples:
-
-```text
-feature/question-ui
-feature/mystery-gameplay
-feature/frontend-routing
-feature/answer-checker
-feature/mystery-controller
-feature/api-routes
-```
-
-After completing work:
-
-```bash
-git status
-git add .
-git commit -m "feat: describe the change"
-git push -u origin feature/your-task-name
-```
-
-Then create a Pull Request.
-
-Do not push directly to `main`.
-
----
-
-# 16. Team
-
-| Member           | Responsibility                                |
-| ---------------- | --------------------------------------------- |
-| Ali Al Hamwi     | Question & Hint UI + Notifications            |
-| Yousef Yousef    | Mystery Gameplay + API Service + Types        |
-| Nagham Jaza      | Routing + Pages + Application Structure       |
-| Nawar Hasan      | Validation + Answer Checking                  |
-| Laith Haj Hosin  | Mystery Controller + Game State + Progression |
-| Mohammad Kashmar | API Routes + Endpoint Testing                 |
-
-Each member owns a specific implementation area, but every member is expected to understand the complete project.
-
----
-
-# 17. Content
-
-The current mystery data can be mock data during development.
-
-Before the final submission, the team must create the final original:
-
-* mystery theme
-* story
-* characters if needed
-* questions
-* clues
-* answers
-* hints
-* final reveal
-* visual identity
-
-The final experience should feel like one coherent mystery rather than unrelated questions.
-
----
-
-# 18. Final Testing
-
-Before submission, the team must verify the complete flow:
-
-```text
-Home
- ↓
-Start Mystery
- ↓
-Load Mystery
- ↓
-Question 1
- ↓
-Wrong Answer
- ↓
-Retry
- ↓
-Hint
- ↓
-Correct Answer
- ↓
-Next Question
- ↓
-...
- ↓
-Final Question
- ↓
-Final Reveal
- ↓
-Next Mystery
- ↓
-Final Completion
-```
-
-Also test:
-
-* invalid mystery ID
-* invalid question ID
-* missing answer
-* invalid answer type
-* empty answer
-* wrong answer
-* correct answer
-* first hint
-* second hint
-* third hint
-* server/API error
-* page refresh
-* responsive layout
-
----
-
-# 19. Definition of Done
-
-The project is ready when:
-
-### Frontend
-
-* React + TypeScript are used.
-* React Router is implemented.
-* At least three meaningful routes exist.
-* A dynamic mystery route exists.
-* Mystery data comes from the backend.
-* API calls use the API helper.
-* Loading states exist.
-* Error states exist.
-* Answer input works.
-* Hints work.
-* Notifications work.
-* Result/completion screen works.
-* The interface is responsive.
-
-### Backend
-
-* Node.js + Express are used.
-* Express Router is used.
-* Controllers are implemented.
-* Runtime state is stored in memory.
-* Mystery collection endpoint works.
-* Mystery detail endpoint works.
-* Answer endpoint works.
-* Hint endpoint works.
-* Validation works.
-* 400 responses work.
-* 404 responses work.
-* Endpoints are tested independently.
-
-### Gameplay
-
-* One answer per question.
-* Answers are case-insensitive.
-* Questions must be solved in order.
-* Wrong answers allow retry.
-* Maximum two hints per question.
-* Correct answers advance the game.
-* Mystery completion works.
-* Final reveal works.
-* Next mystery progression works.
-
-### Project Quality
-
-* Original story and clues.
-* Intentional visual identity.
-* Responsive design.
-* Clean project structure.
-* No forbidden technologies.
-* Meaningful Git history.
-* README documentation.
-* Full end-to-end testing.
-* All team members understand the whole project.
-* All team members can participate in the English presentation.
-
----
-
-# 20. Documentation
-
-Additional project documentation:
-
-```text
-docs/PROJECT-STRUCTURE.md
-```
-
-Detailed architecture and file responsibilities.
-
-```text
-docs/API.md
-```
-
-Detailed API contract and endpoint behavior.
-
-```text
-docs/TASKS.md
-```
-
-Team responsibilities, ownership, workflow, and Definition of Done.
+- Home loads all mysteries.
+- Locked mysteries cannot be opened through the API.
+- Mystery exploration loads correctly.
+- Gameplay loads the correct current question.
+- Wrong answers do not advance the game.
+- Correct answers advance the game.
+- Questions cannot be skipped.
+- First and second hints work.
+- Third hint is rejected.
+- Mystery completion works.
+- Next mystery unlocks.
+- Final reveal is not exposed early.
+- Result navigation works.
+- Invalid IDs show errors instead of blank pages.
+- Network/server failures show recoverable UI.
+- Desktop and mobile layouts work.
