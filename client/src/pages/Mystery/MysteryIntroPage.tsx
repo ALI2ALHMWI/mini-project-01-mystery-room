@@ -42,11 +42,11 @@ function MysteryIntroPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [loadMystery]);
+  }, [id, navigate]);
 
   useEffect(() => {
     loadMystery();
-  }, [id, navigate]);
+  }, [loadMystery]);
 
   if (isLoading) {
     return (
