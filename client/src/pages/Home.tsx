@@ -13,32 +13,26 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  async function loadMysteries() {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await getMysteries();
+      setMysteries(data);
+    } catch (err: unknown) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Unable to load mysteries. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   useEffect(() => {
-    let isCurrentRequest = true;
-
-    getMysteries()
-      .then((data) => {
-        if (!isCurrentRequest) return;
-        setMysteries(data);
-      })
-      .catch((err: unknown) => {
-        if (!isCurrentRequest) return;
-
-        if (err instanceof ApiError) {
-          setError(err.message);
-        } else {
-          setError("Unable to load mysteries. Please try again.");
-        }
-      })
-      .finally(() => {
-        if (isCurrentRequest) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isCurrentRequest = false;
-    };
+    loadMysteries();
   }, []);
 
   const firstUnlockedMystery = mysteries.find((mystery) => mystery.unlocked);
