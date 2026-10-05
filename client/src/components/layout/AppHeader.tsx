@@ -51,10 +51,6 @@ function AppHeader() {
           </NavLink>
         </nav>
 
-        <button className="app-header__login" type="button">
-          Login
-        </button>
-
         <button
           className="app-header__menu"
           type="button"
