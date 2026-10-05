@@ -1,0 +1,119 @@
+.how-to-play-page {
+  min-height: calc(100vh - 76px);
+  padding: var(--space-12) 0 var(--space-16);
+  background: radial-gradient(circle at 70% 15%, rgba(245, 184, 61, 0.08), transparent 30%), var(--color-bg-deep);
+}
+
+.how-to-play-card {
+  width: min(calc(100% - (var(--space-8) * 2)), 820px);
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 52px);
+  background: linear-gradient(180deg, rgba(16, 41, 67, 0.98), rgba(11, 27, 45, 0.98));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.how-to-play-card h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 64px);
+  line-height: 1;
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rules-list li {
+  position: relative;
+  padding: var(--space-4) var(--space-5) var(--space-4) 48px;
+  background: rgba(7, 19, 33, 0.4);
+  border: 1px solid rgba(43, 75, 104, 0.55);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.rules-list li::before {
+  position: absolute;
+  top: 50%;
+  left: 18px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  background: rgba(245, 184, 61, 0.14);
+  border: 1px solid rgba(245, 184, 61, 0.4);
+  border-radius: 50%;
+  color: var(--color-primary);
+  content: "✓";
+  font-size: 12px;
+  font-weight: var(--font-weight-bold);
+  transform: translateY(-50%);
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: var(--space-8);
+  padding: 12px 22px;
+  background: var(--color-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-bg-deep);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.primary-button:hover {
+  background: var(--color-primary-hover);
+  box-shadow: var(--shadow-gold);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .how-to-play-page {
+    min-height: calc(100vh - 68px);
+    padding: var(--space-8) 0 var(--space-12);
+  }
+
+  .how-to-play-card {
+    width: min(calc(100% - (var(--space-4) * 2)), 820px);
+    padding: var(--space-6);
+  }
+
+  .rules-list {
+    margin-top: var(--space-6);
+  }
+
+  .rules-list li {
+    padding: var(--space-3) var(--space-4) var(--space-3) 44px;
+  }
+
+  .rules-list li::before {
+    left: 14px;
+  }
+
+  .primary-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .how-to-play-card {
+    padding: var(--space-5);
+  }
+
+  .how-to-play-card h1 {
+    font-size: 38px;
+  }
+}
