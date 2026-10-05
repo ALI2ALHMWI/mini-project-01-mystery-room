@@ -15,10 +15,6 @@ interface QuestionCardProps {
     type: FeedbackType;
     message: string;
   };
-  onRetry?: () => void;
-  onHint?: () => void;
-  canUseHint?: boolean;
-  isRequestingHint?: boolean;
 }
 
 function QuestionCard({
@@ -32,10 +28,6 @@ function QuestionCard({
     type: null,
     message: "",
   },
-  onRetry,
-  onHint,
-  canUseHint = false,
-  isRequestingHint = false,
 }: QuestionCardProps) {
   const [answer, setAnswer] = useState("");
 
