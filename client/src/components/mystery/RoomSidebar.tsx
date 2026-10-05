@@ -13,22 +13,17 @@ const rooms = [
   {
     id: "mystery-1",
     label: "Room 1",
-    subtitle: "The Old Library",
+    subtitle: "Mystery 1",
   },
   {
     id: "mystery-2",
     label: "Room 2",
-    subtitle: "The Secret Passage",
+    subtitle: "Mystery 2",
   },
   {
     id: "mystery-3",
     label: "Room 3",
-    subtitle: "The Hidden Chamber",
-  },
-  {
-    id: "mystery-4",
-    label: "Room 4",
-    subtitle: "The Final Room",
+    subtitle: "Mystery 3",
   },
 ];
 
