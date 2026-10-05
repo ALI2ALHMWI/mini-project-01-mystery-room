@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import HintCard from "../../components/hint/HintCard";
@@ -47,7 +47,7 @@ export default function MysteryPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRequestingHint, setIsRequestingHint] = useState(false);
 
-  async function loadMystery() {
+  const loadMystery = useCallback(async () => {
     if (!id) {
       setLoadError("Mystery ID is missing from the URL.");
       setIsLoading(false);
@@ -95,7 +95,7 @@ export default function MysteryPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [loadMystery]);
 
   useEffect(() => {
     loadMystery();
