@@ -14,6 +14,11 @@ import type {
 import QuestionCard from "../../components/question/QuestionCard";
 import HintCard from "../../components/hint/HintCard";
 import { useNotification } from "../../context/NotificationContext";
+import RoomSidebar from "../../components/mystery/RoomSidebar";
+import RoomHero from "../../components/mystery/RoomHero";
+
+import "./MysteryPage.css";
+
 
 export interface MysteryGameplayProps {
   mystery: Mystery;
@@ -205,43 +210,70 @@ export default function MysteryPage() {
 
   const hintsUsed = question.maxHints - hintsRemaining;
 
-  return (
-    <main>
-      <header>
-        <h1>{mystery.title}</h1>
-        <p>{mystery.description}</p>
-      </header>
+ return (
+   <main className="mystery-page">
+     <div className="mystery-page__container container">
+       <div className="mystery-page__topbar">
+         <div>
+           <span className="mystery-page__eyebrow">
+             Mystery Room / Investigation
+           </span>
 
-      <section aria-labelledby="mystery-story-heading">
-        <h2 id="mystery-story-heading">Story</h2>
-        <p>{mystery.story}</p>
-      </section>
+           <p className="mystery-page__status">
+             The truth is hidden in the details.
+           </p>
+         </div>
 
-      <section aria-labelledby="mystery-question-heading">
-        <h2 id="mystery-question-heading">
-          Question {question.order} of {orderedQuestions.length}
-        </h2>
+         <span className="mystery-page__question-count">
+           Question {question.order} / {orderedQuestions.length}
+         </span>
+       </div>
 
-        <QuestionCard
-          questionId={question.id}
-          questionNumber={question.order}
-          totalQuestions={orderedQuestions.length}
-          question={question.text}
-          onSubmit={submitAnswer}
-          isSubmitting={isSubmitting}
-          feedback={feedback ?? undefined}
-        />
+       <div className="mystery-layout">
+         <RoomSidebar
+           currentRoomTitle={mystery.title}
+           currentRoomId={mystery.id}
+           completedQuestions={Math.max(question.order - 1, 0)}
+           totalQuestions={orderedQuestions.length}
+         />
 
-        <HintCard
-          hint={hint?.hint}
-          hintsUsed={hintsUsed}
-          maxHints={question.maxHints}
-          onRequestHint={requestCurrentHint}
-          isLoading={isRequestingHint}
-        />
+         <RoomHero
+           mysteryId={mystery.id}
+           title={mystery.title}
+           description={mystery.description}
+           story={mystery.story}
+           questionNumber={question.order}
+           totalQuestions={orderedQuestions.length}
+         />
 
-        {actionError && <p role="alert">{actionError}</p>}
-      </section>
-    </main>
-  );
+         <aside className="mystery-question-panel">
+           <QuestionCard
+             questionId={question.id}
+             questionNumber={question.order}
+             totalQuestions={orderedQuestions.length}
+             question={question.text}
+             onSubmit={submitAnswer}
+             isSubmitting={isSubmitting}
+             feedback={feedback ?? undefined}
+           />
+
+           <HintCard
+             hint={hint?.hint}
+             hintsUsed={hintsUsed}
+             maxHints={question.maxHints}
+             onRequestHint={requestCurrentHint}
+             isLoading={isRequestingHint}
+           />
+
+           {actionError && (
+             <p className="mystery-page__action-error" role="alert">
+               {actionError}
+             </p>
+           )}
+         </aside>
+       </div>
+     </div>
+   </main>
+ );
+
 }

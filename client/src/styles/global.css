@@ -1,9 +1,5 @@
 @import "./variables.css";
 
-/* =========================
-   Reset
-   ========================= */
-
 *,
 *::before,
 *::after {
@@ -11,10 +7,8 @@
 }
 
 html {
-  margin: 0;
-  padding: 0;
   min-height: 100%;
-  background: var(--color-bg);
+  background: var(--color-bg-deep);
 }
 
 body {
@@ -22,12 +16,17 @@ body {
   min-width: 320px;
   min-height: 100vh;
 
-  background: var(--color-bg);
-  color: var(--color-text);
+  background:
+    radial-gradient(
+      circle at 20% 10%,
+      rgba(22, 54, 83, 0.28),
+      transparent 30%
+    ),
+    var(--color-bg-deep);
 
-  font-family: var(--font-family);
+  color: var(--color-text);
+  font-family: var(--font-body);
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
 
   -webkit-font-smoothing: antialiased;
@@ -37,10 +36,6 @@ body {
 #root {
   min-height: 100vh;
 }
-
-/* =========================
-   Typography
-   ========================= */
 
 h1,
 h2,
@@ -54,18 +49,6 @@ h6 {
   line-height: var(--line-height-tight);
 }
 
-h1 {
-  font-size: var(--font-size-4xl);
-}
-
-h2 {
-  font-size: var(--font-size-3xl);
-}
-
-h3 {
-  font-size: var(--font-size-2xl);
-}
-
 p {
   margin: 0;
 }
@@ -75,31 +58,16 @@ a {
   text-decoration: none;
 }
 
-/* =========================
-   Buttons
-   ========================= */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
 
 button {
   border: 0;
-  border-radius: var(--radius-md);
-
-  padding: var(--space-3) var(--space-4);
-
-  font: inherit;
-  font-weight: var(--font-weight-semibold);
-
   cursor: pointer;
-
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast),
-    color var(--transition-fast),
-    transform var(--transition-fast),
-    opacity var(--transition-fast);
-}
-
-button:active:not(:disabled) {
-  transform: translateY(1px);
 }
 
 button:disabled {
@@ -107,14 +75,11 @@ button:disabled {
   opacity: 0.55;
 }
 
-/* =========================
-   Form Elements
-   ========================= */
-
-input,
-textarea,
-select {
-  font: inherit;
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
 }
 
 input,
@@ -124,86 +89,29 @@ select {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-
-  outline: none;
-
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background-color var(--transition-fast);
 }
 
 input:focus,
 textarea:focus,
 select:focus {
   border-color: var(--color-primary);
-
-  box-shadow:
-    0 0 0 3px rgba(245, 184, 61, 0.15);
+  box-shadow: 0 0 0 3px rgba(245, 184, 61, 0.15);
+  outline: none;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: var(--color-text-muted);
+  color: var(--color-text-subtle);
 }
-
-/* =========================
-   Images
-   ========================= */
 
 img {
   display: block;
   max-width: 100%;
 }
 
-/* =========================
-   Lists
-   ========================= */
-
-ul,
-ol {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* =========================
-   Selection
-   ========================= */
-
-::selection {
-  background: var(--color-primary);
-  color: var(--color-bg);
-}
-
-/* =========================
-   Scrollbar
-   ========================= */
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-bg);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border-light);
-  border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary-muted);
-}
-
-/* =========================
-   Utility Classes
-   ========================= */
-
 .page {
-  min-height: 100vh;
   width: 100%;
+  min-height: 100vh;
 }
 
 .container {
@@ -215,6 +123,10 @@ ol {
   margin: 0 auto;
 }
 
+.display-text {
+  font-family: var(--font-display);
+}
+
 .text-muted {
   color: var(--color-text-muted);
 }
@@ -223,28 +135,11 @@ ol {
   color: var(--color-primary);
 }
 
-.text-success {
-  color: var(--color-success);
-}
-
-.text-error {
-  color: var(--color-error);
-}
-
-/* =========================
-   Responsive Typography
-   ========================= */
-
 @media (max-width: 768px) {
-  h1 {
-    font-size: var(--font-size-3xl);
-  }
-
-  h2 {
-    font-size: var(--font-size-2xl);
-  }
-
-  h3 {
-    font-size: var(--font-size-xl);
+  .container {
+    width: min(
+      calc(100% - (var(--space-4) * 2)),
+      var(--container-xl)
+    );
   }
 }
