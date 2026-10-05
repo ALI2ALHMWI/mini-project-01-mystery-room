@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { ApiError, getMysteryById } from "../../services/api";
@@ -18,37 +18,35 @@ function MysteryIntroPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadMystery = useCallback(async () => {
     if (!id) {
       setError("Mystery ID is missing from the URL.");
       setIsLoading(false);
       return;
     }
 
-    let active = true;
+    setIsLoading(true);
+    setError(null);
 
-    getMysteryById(id)
-      .then((loaded) => {
-        if (!active) return;
+    try {
+      const loaded = await getMysteryById(id);
 
-        if (loaded.completed) {
-          navigate(`/result/${encodeURIComponent(id)}`, { replace: true });
-          return;
-        }
+      if (loaded.completed) {
+        navigate(`/result/${encodeURIComponent(id)}`, { replace: true });
+        return;
+      }
 
-        setMystery(loaded);
-      })
-      .catch((requestError: unknown) => {
-        if (active) setError(getErrorMessage(requestError));
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
+      setMystery(loaded);
+    } catch (requestError: unknown) {
+      setError(getErrorMessage(requestError));
+    } finally {
+      setIsLoading(false);
+    }
   }, [id, navigate]);
+
+  useEffect(() => {
+    loadMystery();
+  }, [loadMystery]);
 
   if (isLoading) {
     return (

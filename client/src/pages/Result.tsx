@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import SuccessScreen from "../components/result/SuccessScreen";
@@ -30,39 +30,36 @@ function Result() {
   const [isLoading, setIsLoading] = useState(!navigationState?.finalReveal);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadResult = useCallback(async () => {
     if (!id) {
       setError("Mystery ID is missing from the URL.");
       setIsLoading(false);
       return;
     }
 
-    let isCurrentRequest = true;
+    setIsLoading(true);
+    setError(null);
 
-    getMysteryById(id)
-      .then((mystery) => {
-        if (!isCurrentRequest) return;
+    try {
+      const mystery = await getMysteryById(id);
 
-        if (!mystery.completed) {
-          setError("This mystery has not been completed yet.");
-          return;
-        }
+      if (!mystery.completed) {
+        setError("This mystery has not been completed yet.");
+        return;
+      }
 
-        setFinalReveal(mystery.finalReveal ?? null);
-        setNextMysteryId(mystery.nextMysteryId ?? null);
-        setError(null);
-      })
-      .catch((requestError: unknown) => {
-        if (isCurrentRequest) setError(getErrorMessage(requestError));
-      })
-      .finally(() => {
-        if (isCurrentRequest) setIsLoading(false);
-      });
-
-    return () => {
-      isCurrentRequest = false;
-    };
+      setFinalReveal(mystery.finalReveal ?? null);
+      setNextMysteryId(mystery.nextMysteryId ?? null);
+    } catch (requestError: unknown) {
+      setError(getErrorMessage(requestError));
+    } finally {
+      setIsLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    loadResult();
+  }, [loadResult]);
 
   const hasNextMystery = Boolean(nextMysteryId);
 

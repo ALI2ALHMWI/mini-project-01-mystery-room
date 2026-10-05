@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { ApiError, getMysteries } from "../services/api";
@@ -13,33 +13,27 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isCurrentRequest = true;
+  const loadMysteries = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-    getMysteries()
-      .then((data) => {
-        if (!isCurrentRequest) return;
-        setMysteries(data);
-      })
-      .catch((err: unknown) => {
-        if (!isCurrentRequest) return;
-
-        if (err instanceof ApiError) {
-          setError(err.message);
-        } else {
-          setError("Unable to load mysteries. Please try again.");
-        }
-      })
-      .finally(() => {
-        if (isCurrentRequest) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isCurrentRequest = false;
-    };
+    try {
+      const data = await getMysteries();
+      setMysteries(data);
+    } catch (err: unknown) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Unable to load mysteries. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadMysteries();
+  }, [loadMysteries]);
 
   const firstUnlockedMystery = mysteries.find((mystery) => mystery.unlocked);
 
