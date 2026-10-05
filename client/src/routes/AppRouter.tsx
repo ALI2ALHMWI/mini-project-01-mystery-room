@@ -7,6 +7,7 @@ import Result from "../pages/Result";
 import MysteryPage from "../pages/Mystery/MysteryPage";
 import About from "../pages/About";
 import Settings from "../pages/Settings";
+import NotFound from "../pages/NotFound";
 
 function AppRouter() {
   return (
@@ -20,6 +21,7 @@ function AppRouter() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/result/:id" element={<Result />} />
         <Route path="/mystery/:id" element={<MysteryPage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
