@@ -111,7 +111,7 @@ const mysteries = [
       "• The pilot says he remained in the cockpit and communicated with air traffic control during the entire reset.\n" +
       "• The flight attendant says she was in the rear galley resetting the electrical panel.\n" +
       "• Dr. Owen, a passenger and friend of the victim, says he stayed in his seat and never left it.\n\n" +
-      "The investigator checks the galley panel, the cockpit log, and the victim's bottle. The evidence shows that the person who poisoned the bottle had to leave their original position during the blackout.",
+      "The investigator checks the galley panel, the cockpit log, and the victim's bottle. The aircraft also records passenger seat occupancy. The evidence shows that the person who poisoned the bottle had to leave their original position during the blackout.",
     questions: [
       {
         id: 1,
