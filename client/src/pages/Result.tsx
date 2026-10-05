@@ -30,38 +30,35 @@ function Result() {
   const [isLoading, setIsLoading] = useState(!navigationState?.finalReveal);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  async function loadResult() {
     if (!id) {
       setError("Mystery ID is missing from the URL.");
       setIsLoading(false);
       return;
     }
 
-    let isCurrentRequest = true;
+    setIsLoading(true);
+    setError(null);
 
-    getMysteryById(id)
-      .then((mystery) => {
-        if (!isCurrentRequest) return;
+    try {
+      const mystery = await getMysteryById(id);
 
-        if (!mystery.completed) {
-          setError("This mystery has not been completed yet.");
-          return;
-        }
+      if (!mystery.completed) {
+        setError("This mystery has not been completed yet.");
+        return;
+      }
 
-        setFinalReveal(mystery.finalReveal ?? null);
-        setNextMysteryId(mystery.nextMysteryId ?? null);
-        setError(null);
-      })
-      .catch((requestError: unknown) => {
-        if (isCurrentRequest) setError(getErrorMessage(requestError));
-      })
-      .finally(() => {
-        if (isCurrentRequest) setIsLoading(false);
-      });
+      setFinalReveal(mystery.finalReveal ?? null);
+      setNextMysteryId(mystery.nextMysteryId ?? null);
+    } catch (requestError: unknown) {
+      setError(getErrorMessage(requestError));
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-    return () => {
-      isCurrentRequest = false;
-    };
+  useEffect(() => {
+    loadResult();
   }, [id]);
 
   const hasNextMystery = Boolean(nextMysteryId);
