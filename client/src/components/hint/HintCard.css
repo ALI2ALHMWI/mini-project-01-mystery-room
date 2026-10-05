@@ -144,3 +144,10 @@
     font-size: var(--font-size-xs);
   }
 }
+.mystery-question-panel .hint-card {
+  width: 100%;
+}
+
+.mystery-question-panel .hint-card__content {
+  min-height: 150px;
+}

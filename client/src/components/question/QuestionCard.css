@@ -196,3 +196,10 @@
     padding: var(--space-4);
   }
 }
+.mystery-question-panel .question-card {
+  width: 100%;
+  max-width: none;
+}
+.question-card__question {
+  overflow-wrap: anywhere;
+}
