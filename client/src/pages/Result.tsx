@@ -1,125 +1,76 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ApiError, getMysteryById } from "../services/api";
-import type { Mystery } from "../types/mystery.types";
+import { Link, useLocation, useParams } from "react-router-dom";
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof ApiError) {
-    return error.message;
-  }
+import SuccessScreen from "../components/result/SuccessScreen";
 
-  if (error instanceof Error) {
-    return error.message;
-  }
+import "./Result.css";
 
-  return "Unable to load the result. Please try again.";
+interface ResultLocationState {
+  finalReveal?: string;
+  nextMysteryId?: string | null;
 }
 
 function Result() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
 
-  const [mystery, setMystery] = useState<Mystery | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const state = location.state as ResultLocationState | null;
 
-  useEffect(() => {
-    if (!id) {
-      setError("Mystery ID is missing.");
-      setIsLoading(false);
-      return;
-    }
+  const finalReveal = state?.finalReveal;
+  const nextMysteryId = state?.nextMysteryId ?? null;
 
-    let isCurrentRequest = true;
-
-    setIsLoading(true);
-    setError(null);
-
-    getMysteryById(id)
-      .then((loadedMystery) => {
-        if (!isCurrentRequest) {
-          return;
-        }
-
-        if (!loadedMystery.completed) {
-          setError("This mystery has not been completed yet.");
-          return;
-        }
-
-        setMystery(loadedMystery);
-      })
-      .catch((requestError: unknown) => {
-        if (isCurrentRequest) {
-          setError(getErrorMessage(requestError));
-        }
-      })
-      .finally(() => {
-        if (isCurrentRequest) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isCurrentRequest = false;
-    };
-  }, [id]);
-
-  if (isLoading) {
-    return (
-      <main className="result-page" aria-busy="true">
-        <section className="result-card">
-          <p>Loading result...</p>
-        </section>
-      </main>
-    );
-  }
-
-  if (error || !mystery) {
-    return (
-      <main className="result-page">
-        <section className="result-card">
-          <h1>Unable to Load Result</h1>
-          <p role="alert">{error ?? "Result data is unavailable."}</p>
-
-          <div className="result-actions">
-            <Link className="primary-button" to="/">
-              Back Home
-            </Link>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  const hasNextMystery = Boolean(mystery.nextMysteryId);
+  const hasNextMystery = Boolean(nextMysteryId);
 
   return (
     <main className="result-page">
-      <section className="result-card">
-        <h1>Mystery Complete</h1>
+      <div className="result-page__container container">
+        <div className="result-page__breadcrumb">
+          <span>Mystery Room</span>
+          <span aria-hidden="true">/</span>
+          <span>Final Reveal</span>
+        </div>
 
-        <p className="final-reveal">
-          {mystery.finalReveal ?? "You solved this mystery."}
-        </p>
+        <SuccessScreen
+          title={hasNextMystery ? "Mystery Complete!" : "All Mysteries Solved!"}
+          message={
+            hasNextMystery
+              ? "You uncovered the truth hidden inside this room."
+              : "You solved every mystery and uncovered the full truth."
+          }
+          detail={
+            finalReveal ??
+            "The final reveal will appear here after the mystery is completed."
+          }
+          primaryLabel={hasNextMystery ? "Next Mystery" : "Back Home"}
+        />
 
-        <div className="result-actions">
-          {hasNextMystery && mystery.nextMysteryId ? (
+        <div className="result-page__actions">
+          {hasNextMystery ? (
             <Link
-              className="primary-button"
-              to={`/mystery/${encodeURIComponent(mystery.nextMysteryId)}`}
+              className="result-page__next-link"
+              to={`/mystery/${encodeURIComponent(nextMysteryId as string)}`}
             >
-              Next Mystery
+              Continue to the next room
+              <span aria-hidden="true">→</span>
             </Link>
           ) : (
-            <p className="final-completion">
-              You solved all available mysteries.
-            </p>
+            <Link className="result-page__next-link" to="/">
+              Return to Home
+              <span aria-hidden="true">→</span>
+            </Link>
           )}
 
-          <Link className="secondary-button" to="/">
+          <Link className="result-page__home-link" to="/">
             Back Home
           </Link>
         </div>
-      </section>
+
+        {!finalReveal && (
+          <p className="result-page__notice">
+            Result ID: {id}. Refreshing the page may remove temporary navigation
+            state because the final reveal is passed after completion.
+          </p>
+        )}
+      </div>
     </main>
   );
 }
