@@ -40,7 +40,7 @@ function AppHeader() {
           </NavLink>
 
           <NavLink
-            to="/how-to-play"
+            to="/about"
             className={({ isActive }) =>
               `app-navigation__link ${
                 isActive ? "app-navigation__link--active" : ""
