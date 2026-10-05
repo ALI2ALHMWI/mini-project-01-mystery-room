@@ -1,33 +1,18 @@
 import { NavLink } from "react-router-dom";
 
+import type { MysteryListItem } from "../../types/mystery.types";
 import "./RoomSidebar.css";
 
 interface RoomSidebarProps {
+  rooms: MysteryListItem[];
   currentRoomTitle: string;
   currentRoomId: string;
   completedQuestions: number;
   totalQuestions: number;
 }
 
-const rooms = [
-  {
-    id: "mystery-1",
-    label: "Room 1",
-    subtitle: "Mystery 1",
-  },
-  {
-    id: "mystery-2",
-    label: "Room 2",
-    subtitle: "Mystery 2",
-  },
-  {
-    id: "mystery-3",
-    label: "Room 3",
-    subtitle: "Mystery 3",
-  },
-];
-
 function RoomSidebar({
+  rooms,
   currentRoomTitle,
   currentRoomId,
   completedQuestions,
@@ -48,32 +33,26 @@ function RoomSidebar({
       <nav className="room-sidebar__list" aria-label="Mystery rooms">
         {rooms.map((room) => {
           const isCurrent = room.id === currentRoomId;
-          const isFirstRoom = room.id === "mystery-1";
+          const isUnlocked = room.unlocked || isCurrent;
 
           return (
             <NavLink
               key={room.id}
-              to={isFirstRoom || isCurrent ? `/mystery/${room.id}` : "#"}
-              className={`room-sidebar__room ${
-                isCurrent ? "room-sidebar__room--active" : ""
-              } ${
-                !isFirstRoom && !isCurrent ? "room-sidebar__room--locked" : ""
-              }`}
+              to={isUnlocked ? `/mystery/${encodeURIComponent(room.id)}` : "#"}
+              className={`room-sidebar__room ${isCurrent ? "room-sidebar__room--active" : ""} ${!isUnlocked ? "room-sidebar__room--locked" : ""}`}
               onClick={(event) => {
-                if (!isFirstRoom && !isCurrent) {
-                  event.preventDefault();
-                }
+                if (!isUnlocked) event.preventDefault();
               }}
               aria-current={isCurrent ? "page" : undefined}
-              aria-disabled={!isFirstRoom && !isCurrent}
+              aria-disabled={!isUnlocked}
             >
               <span className="room-sidebar__icon" aria-hidden="true">
-                {isFirstRoom || isCurrent ? "◉" : "▣"}
+                {isUnlocked ? "◉" : "▣"}
               </span>
 
               <span className="room-sidebar__room-content">
-                <strong>{isCurrent ? currentRoomTitle : room.label}</strong>
-                <small>{room.subtitle}</small>
+                <strong>{isCurrent ? currentRoomTitle : room.title}</strong>
+                <small>{room.description}</small>
               </span>
 
               {isCurrent && (
