@@ -1,7 +1,6 @@
 import libraryImage from "../../assets/generated/room-library.jpg";
 import secretPassageImage from "../../assets/generated/room-secret-passage.jpg";
 import hiddenChamberImage from "../../assets/generated/room-hidden-chamber.jpg";
-import finalRevealImage from "../../assets/generated/room-final-reveal.jpg";
 
 import "./RoomHero.css";
 
@@ -18,7 +17,6 @@ const roomImages: Record<string, string> = {
   "mystery-1": libraryImage,
   "mystery-2": secretPassageImage,
   "mystery-3": hiddenChamberImage,
-  "mystery-4": finalRevealImage,
 };
 
 function RoomHero({
@@ -36,17 +34,17 @@ function RoomHero({
       ? Math.round(((questionNumber - 1) / totalQuestions) * 100)
       : 0;
 
+  function scrollToQuestions() {
+    document
+      .getElementById("mystery-question-panel")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <section className="room-hero">
       <div className="room-hero__image-wrapper">
-        <img
-          className="room-hero__image"
-          src={roomImage}
-          alt={`${title} room`}
-        />
-
+        <img className="room-hero__image" src={roomImage} alt={`${title} room`} />
         <div className="room-hero__image-overlay" />
-
         <div className="room-hero__image-label">
           <span>Current room</span>
           <strong>{title}</strong>
@@ -65,7 +63,11 @@ function RoomHero({
           <p>{story}</p>
         </div>
 
-        <button className="room-hero__explore" type="button">
+        <button
+          className="room-hero__explore"
+          type="button"
+          onClick={scrollToQuestions}
+        >
           Explore the Room
           <span aria-hidden="true">→</span>
         </button>
