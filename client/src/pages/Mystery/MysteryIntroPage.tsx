@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { ApiError, getMysteryById } from "../../services/api";
@@ -18,7 +18,7 @@ function MysteryIntroPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadMystery() {
+  const loadMystery = useCallback(async () => {
     if (!id) {
       setError("Mystery ID is missing from the URL.");
       setIsLoading(false);
@@ -42,7 +42,7 @@ function MysteryIntroPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [loadMystery]);
 
   useEffect(() => {
     loadMystery();
