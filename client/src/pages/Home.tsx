@@ -29,11 +29,11 @@ function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, [loadMysteries]);
+  }, []);
 
   useEffect(() => {
     loadMysteries();
-  }, []);
+  }, [loadMysteries]);
 
   const firstUnlockedMystery = mysteries.find((mystery) => mystery.unlocked);
 
