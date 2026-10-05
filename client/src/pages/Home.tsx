@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { ApiError, getMysteries } from "../services/api";
@@ -13,7 +13,7 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadMysteries() {
+  const loadMysteries = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -29,7 +29,7 @@ function Home() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [loadMysteries]);
 
   useEffect(() => {
     loadMysteries();
