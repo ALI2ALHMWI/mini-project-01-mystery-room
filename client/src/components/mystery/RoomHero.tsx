@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 
-import libraryImage from "../../assets/generated/room-library.jpg";
-import secretPassageImage from "../../assets/generated/room-secret-passage.jpg";
-import hiddenChamberImage from "../../assets/generated/room-hidden-chamber.jpg";
+import libraryImage from "../../assets/generated/room-library.svg";
+import secretPassageImage from "../../assets/generated/room-secret-passage.svg";
+import hiddenChamberImage from "../../assets/generated/room-hidden-chamber.svg";
 
 import "./RoomHero.css";
 
