@@ -1,352 +1,316 @@
 # Mini Project 01 — Mystery Room
 
-## Updated Project Structure
+## 1. Purpose
 
-This document describes the target structure after the Mystery Room visual redesign. The redesign changes the frontend presentation while preserving the backend-driven gameplay model.
+This document describes the current architecture of the Mystery Room project.
 
-> Answer interaction is intentionally a free-text input. Questions do not expose selectable answer options.
+The project is intentionally simple: React + TypeScript on the frontend, Node.js + Express on the backend, a small API service layer, and in-memory gameplay state.
 
----
-
-## 1. Project Overview
-
-Mystery Room is a browser-based interactive mystery experience. The player enters a room, reads the story, investigates clues, types answers, requests hints when needed, and progresses through the mystery step by step.
-
-The frontend is responsible for:
-
-- Layout and visual presentation.
-- Responsive interaction.
-- Text answer input.
-- Loading and error states.
-- Calling the API service.
-- Displaying backend results and notifications.
-
-The backend is responsible for:
-
-- Mystery data.
-- Correct answers.
-- Hint text.
-- Answer validation.
-- Question order.
-- Mystery locking and unlocking.
-- Runtime gameplay state.
-- Final reveals.
-
-The backend remains the source of truth for gameplay progression.
-
----
+The backend is the source of truth for mystery progression and hidden solution data.
 
 ## 2. Root Structure
 
 ```text
 Mini-Project-01/
-│
 ├── client/
 │   ├── public/
 │   ├── src/
 │   ├── package.json
 │   └── vite.config.ts
-│
 ├── server/
 │   ├── src/
 │   └── package.json
-│
 ├── docs/
-│   ├── PROJECT-STRUCTURE.md
 │   ├── API.md
-│   ├── TASKS.md
-│   └── TASKS-UI-REDESIGN.md
-│
+│   ├── PROJECT-STRUCTURE.md
+│   └── TASKS.md
 ├── README.md
 └── .gitignore
 ```
 
----
-
 ## 3. Frontend Structure
 
 ```text
-client/
-└── src/
-    ├── assets/
-    │   ├── generated/
-    │   │   ├── mystery-hero-door.jpg
-    │   │   ├── room-library.jpg
-    │   │   ├── room-secret-passage.jpg
-    │   │   ├── room-hidden-chamber.jpg
-    │   │   └── room-final-reveal.jpg
-    │   ├── icons/
-    │   └── logo/
-    │
-    ├── components/
-    │   ├── common/
-    │   │   ├── Button.tsx
-    │   │   ├── ErrorState.tsx
-    │   │   ├── LoadingState.tsx
-    │   │   └── Icon.tsx
-    │   │
-    │   ├── layout/
-    │   │   ├── AppLayout.tsx
-    │   │   ├── AppLayout.css
-    │   │   ├── AppHeader.tsx
-    │   │   ├── AppHeader.css
-    │   │   ├── MobileMenu.tsx
-    │   │   └── MobileMenu.css
-    │   │
-    │   ├── mystery/
-    │   │   ├── MysteryLayout.tsx
-    │   │   ├── MysteryLayout.css
-    │   │   ├── RoomSidebar.tsx
-    │   │   ├── RoomSidebar.css
-    │   │   ├── RoomHero.tsx
-    │   │   ├── RoomHero.css
-    │   │   ├── RoomCard.tsx
-    │   │   └── ProgressBar.tsx
-    │   │
-    │   ├── question/
-    │   │   ├── QuestionCard.tsx
-    │   │   ├── QuestionCard.css
-    │   │   ├── AnswerInput.tsx
-    │   │   └── AnswerFeedback.tsx
-    │   │
-    │   ├── hint/
-    │   │   ├── HintCard.tsx
-    │   │   ├── HintCard.css
-    │   │   ├── HintButton.tsx
-    │   │   └── HintDisplay.tsx
-    │   │
-    │   └── result/
-    │       ├── SuccessScreen.tsx
-    │       ├── SuccessScreen.css
-    │       ├── FailureScreen.tsx
-    │       └── FailureScreen.css
-    │
-    ├── pages/
-    │   ├── Home/
-    │   │   ├── Home.tsx
-    │   │   └── Home.css
-    │   ├── HowToPlay/
-    │   │   ├── HowToPlay.tsx
-    │   │   └── HowToPlay.css
-    │   ├── Mystery/
-    │   │   ├── MysteryPage.tsx
-    │   │   └── MysteryPage.css
-    │   ├── Result/
-    │   │   ├── Result.tsx
-    │   │   └── Result.css
-    │   ├── About.tsx
-    │   ├── About.css
-    │   ├── Settings.tsx
-    │   └── Settings.css
-    │
-    ├── routes/
-    │   └── AppRouter.tsx
-    │
-    ├── context/
-    │   ├── NotificationContext.tsx
-    │   └── NotificationContext.css
-    │
-    ├── hooks/
-    │
-    ├── services/
-    │   └── api.ts
-    │
-    ├── types/
-    │   └── mystery.types.ts
-    │
-    ├── styles/
-    │   ├── global.css
-    │   ├── variables.css
-    │   ├── typography.css
-    │   └── utilities.css
-    │
-    ├── App.tsx
-    └── main.tsx
+client/src/
+├── assets/
+├── components/
+│   ├── common/
+│   ├── layout/
+│   ├── mystery/
+│   ├── question/
+│   ├── hint/
+│   └── result/
+├── pages/
+│   ├── Home/
+│   ├── HowToPlay/
+│   ├── Mystery/
+│   │   ├── MysteryPage.tsx
+│   │   ├── MysteryPage.css
+│   │   ├── MysteryIntroPage.tsx
+│   │   └── MysteryIntroPage.css
+│   ├── Result/
+│   ├── About.tsx
+│   ├── About.css
+│   ├── Settings.tsx
+│   ├── Settings.css
+│   ├── NotFound.tsx
+│   └── NotFound.css
+├── routes/
+│   └── AppRouter.tsx
+├── context/
+│   └── NotificationContext.tsx
+├── hooks/
+├── services/
+│   └── api.ts
+├── types/
+│   └── mystery.types.ts
+├── styles/
+├── App.tsx
+└── main.tsx
 ```
 
-The exact creation of optional subcomponents is flexible, but responsibilities must remain separated and understandable.
+### 3.1 API-driven pages
 
----
-
-## 4. Frontend Assets
-
-### `assets/generated/`
-
-Contains the generated cinematic room imagery used by the redesign:
-
-- `mystery-hero-door.jpg`: Home hero image.
-- `room-library.jpg`: Library room.
-- `room-secret-passage.jpg`: Secret passage room.
-- `room-hidden-chamber.jpg`: Hidden chamber room.
-- `room-final-reveal.jpg`: Final reveal room.
-
-### `assets/icons/` and `assets/logo/`
-
-Contain reusable icons and the Mystery Room visual mark. Icons should be used consistently for locks, hints, profile, settings, menu, check, and error states.
-
-Do not place API data, correct answers, or hint text in assets.
-
----
-
-## 5. Shared Layout Components
-
-### `components/layout/AppLayout.tsx`
-
-Provides the shared application shell and renders the header around routed pages.
-
-### `components/layout/AppHeader.tsx`
-
-Provides:
-
-- Mystery Room branding.
-- Home, Play, About, and Login visual actions.
-- Player and settings actions where appropriate.
-- Responsive mobile menu trigger.
-
-### `components/layout/MobileMenu.tsx`
-
-Provides the mobile navigation drawer or collapsible navigation at narrow widths.
-
-The layout owns presentation only. It must not own mystery progression or answer validation.
-
----
-
-## 6. Mystery Components
-
-### `components/mystery/MysteryLayout.tsx`
-
-Composes the desktop game structure:
-
-```text
-Room Sidebar | Room Content | Question / Hint Panel
-```
-
-On mobile, the structure becomes a vertical layout with a collapsible room navigation.
-
-### `RoomSidebar.tsx`
-
-Displays room titles, locked/unlocked state, the active room, and progress. It must not bypass backend locking rules.
-
-### `RoomHero.tsx`
-
-Displays the current room image, title, and visual introduction.
-
-### `ProgressBar.tsx`
-
-Displays progress calculated from public gameplay state. It must not infer hidden answers.
-
----
-
-## 7. Question and Answer Components
-
-### `components/question/QuestionCard.tsx`
-
-Displays:
-
-- Question label.
-- Question number and total.
-- Current question text.
-- A free-text answer field.
-- Submit action.
-- Loading state.
-- Correct or incorrect feedback.
-
-The answer field is intentionally:
+The pages that own server data use a consistent React pattern:
 
 ```tsx
-<input type="text" />
+const [data, setData] = useState(...);
+const [isLoading, setIsLoading] = useState(true);
+const [error, setError] = useState(...);
+
+const loadData = useCallback(async () => {
+  setIsLoading(true);
+  setError(null);
+
+  try {
+    const result = await fetchData();
+    setData(result);
+  } catch (error) {
+    setError(...);
+  } finally {
+    setIsLoading(false);
+  }
+}, [...]);
+
+useEffect(() => {
+  loadData();
+}, [loadData]);
 ```
 
-There are no radio buttons or answer options. The frontend does not know the correct answer and does not validate its content beyond preventing empty submission.
+Current API-driven pages:
 
-### `AnswerInput.tsx`
+- `Home.tsx` — loads the mystery collection.
+- `MysteryIntroPage.tsx` — loads the selected mystery before investigation.
+- `MysteryPage.tsx` — loads the selected mystery and public mystery list.
+- `Result.tsx` — revalidates the selected mystery before showing the final result.
 
-Owns local input value and basic empty-value handling. It sends the typed string to its parent callback.
+The explicit loader pattern keeps loading, error, retry, and route-change behavior easy to understand.
 
-### `AnswerFeedback.tsx`
+## 4. Page Responsibilities
 
-Displays backend feedback without changing the backend result.
+### Home
 
----
+Loads the public mystery collection and displays:
 
-## 8. Hint Components
+- mystery cards
+- locked/unlocked status
+- start/explore actions
+- loading state
+- error state
 
-### `HintCard.tsx`
+It does not contain answers or hidden hints.
 
-Displays the hint panel, hint count, returned hint, and hint action.
+### How To Play
 
-The actual hint text comes only from:
+Static instructional page. It does not need an API request.
+
+### MysteryIntroPage
+
+Route:
 
 ```text
-PATCH /api/mysteries/:id/questions/:questionId/hint
+/mystery/:id/explore
 ```
 
-The frontend must not preload or hardcode hint content.
+Loads the selected mystery and presents:
 
----
+- title
+- description
+- story
+- question count
+- hint information
+- Start Investigation action
 
-## 9. Result Components and Pages
+If the mystery is already completed, the page redirects to the result page.
 
-### `SuccessScreen.tsx`
+### MysteryPage
 
-Displays the visual success state after a correct answer or completed mystery.
+Route:
 
-### `FailureScreen.tsx`
+```text
+/mystery/:id
+```
 
-Displays the retry state after a wrong answer where a dedicated visual state is needed.
+Owns the active gameplay data flow:
 
-### `pages/Result/Result.tsx`
+1. read the mystery ID
+2. load mystery data
+3. load the public mystery list
+4. determine the backend-provided current question
+5. render the question and hint components
+6. submit answers through the API service
+7. request hints through the API service
+8. refresh/reconcile backend state after successful progression
+9. navigate to the result page after completion
 
-Displays the final reveal received after the final answer and provides the next mystery action when available.
+The page does not know the correct answer or full hint text before the API returns it.
 
-The final reveal must never be hardcoded in the frontend.
+### Result
 
----
+Route:
 
-## 10. Pages and Routes
+```text
+/result/:id
+```
 
-Required routes:
+Revalidates the mystery from the backend. It displays the final reveal only when the backend reports completion and provides navigation to the next mystery when available.
 
-| Route | Page | Responsibility |
-| --- | --- | --- |
-| `/` | Home | Hero, mystery list, start action |
-| `/how-to-play` | How To Play | Explain game rules |
-| `/mystery/:id` | Mystery | Backend-driven gameplay |
-| `/result/:id` | Result | Final reveal and progression |
-| `/about` | About | Product and feature information |
-| `/settings` | Settings | Presentational settings shell |
+## 5. Component Responsibilities
 
-`/mystery/:id` and `/result/:id` are dynamic routes.
+### Layout
 
----
+Presentational application shell and responsive navigation.
 
-## 11. State Management
+### Mystery components
 
-The project continues to use simple state management:
+- `RoomHero` — visual room introduction and navigation to the exploration page.
+- `RoomSidebar` — room list, active room, and backend-provided unlock state.
+- Other mystery layout components — composition and presentation.
 
-- `useState` for answer input, loading, feedback, and hint display.
-- `useEffect` for loading mystery data and reacting to route changes.
-- `NotificationContext` for shared toast notifications.
-- Backend `gameState` for actual progression.
+### Question components
 
-Redux, React Query, databases, authentication, and other forbidden technologies remain out of scope.
+Display the current public question, collect the player's free-text answer, and report the action to the page.
 
-The frontend must not become the source of truth for:
+They do not know the correct answer.
 
-- Correct answers.
-- Solved question IDs.
-- Hint text.
-- Hint usage authority.
-- Mystery completion.
-- Final reveal.
+### Hint components
 
----
+Request/display the hint returned by the API and show remaining hint count.
 
-## 12. Frontend API Layer
+They do not contain hardcoded secret hints.
 
-### `services/api.ts`
+### Result components
 
-All requests go through this file. It provides:
+Render success/completion states and invoke callbacks supplied by the result page.
+
+## 6. Backend Structure
+
+```text
+server/src/
+├── controllers/
+│   └── mystery.controller.js
+├── routes/
+│   └── mystery.routes.js
+├── data/
+│   ├── mysteries.js
+│   └── gameState.js
+└── utils/
+    ├── validation.js
+    └── answerChecker.js
+```
+
+### mysteries.js
+
+Static game content:
+
+- English mystery title
+- description
+- story
+- ordered questions
+- correct answers
+- hidden hints
+- final reveal
+- next mystery ID
+
+This is private backend data.
+
+### gameState.js
+
+In-memory runtime state:
+
+```text
+mysteries[mysteryId]
+  ├── currentQuestionId
+  ├── solvedQuestionIds
+  ├── hintsUsed
+  └── completed
+```
+
+Server restart resets all progress.
+
+### mystery.controller.js
+
+Responsible for:
+
+- finding mysteries/questions
+- validating gameplay state
+- shaping public responses
+- enforcing question order
+- checking answers
+- advancing progression
+- limiting hints
+- unlocking later mysteries
+- returning the final reveal after completion
+
+### validation.js
+
+Validates request IDs and answer payloads.
+
+### answerChecker.js
+
+Normalizes answers with trim + lowercase comparison.
+
+### mystery.routes.js
+
+Defines the API endpoints and connects them to controller functions. Game logic does not belong in the router.
+
+## 7. Data Exposure Boundary
+
+### Safe public data
+
+```text
+Mystery ID
+Title
+Description
+Story
+Question ID
+Question order
+Question text
+maxHints
+Current question ID
+Completion status
+Hints used
+Unlock status
+```
+
+### Backend-only data
+
+```text
+Correct answers
+Full hint arrays
+Unreleased final reveal
+Internal runtime details
+```
+
+The boundary is enforced by `toPublicQuestion`, `toPublicMystery`, and the controller flow.
+
+## 8. API Service
+
+```text
+client/src/services/api.ts
+```
+
+Exports:
 
 ```text
 getMysteries()
@@ -355,15 +319,20 @@ submitAnswer(mysteryId, questionId, answer)
 requestHint(mysteryId, questionId)
 ```
 
-The answer argument is a string typed by the player. UI components must not call `fetch` directly.
+It centralizes:
 
----
+- API base URL
+- request creation
+- JSON parsing
+- HTTP error mapping
+- network error mapping
+- typed responses
 
-## 13. TypeScript Types
+Components/pages should not call `fetch` directly.
 
-### `types/mystery.types.ts`
+## 9. TypeScript Contract
 
-Expected public types include:
+`client/src/types/mystery.types.ts` mirrors the public API.
 
 ```ts
 interface MysteryListItem {
@@ -381,91 +350,77 @@ interface Question {
 }
 ```
 
-The `Question` type intentionally contains no `options` field and no answer field. The player submits free text.
+The public `Question` type intentionally has no answer, hint array, or multiple-choice options.
 
----
+## 10. Routing
 
-## 14. Backend Structure
+The current routes are:
 
-```text
-server/
-└── src/
-    ├── controllers/
-    │   └── mystery.controller.js
-    │
-    ├── routes/
-    │   └── mystery.routes.js
-    │
-    ├── data/
-    │   ├── mysteries.js
-    │   └── gameState.js
-    │
-    ├── utils/
-    │   ├── validation.js
-    │   └── answerChecker.js
-    │
-    ├── app.js
-    └── server.js
-```
+| Route | Responsibility |
+| --- | --- |
+| `/` | Home |
+| `/how-to-play` | Instructions |
+| `/mystery/:id/explore` | Mystery introduction |
+| `/mystery/:id` | Gameplay |
+| `/result/:id` | Completion/result |
+| `/about` | About |
+| `/settings` | Settings |
+| `*` | Not Found |
 
-### Backend ownership
+## 11. Error and Loading Strategy
 
-- `mysteries.js`: private answers, private hints, story content, final reveal, next mystery.
-- `gameState.js`: current question, solved questions, hint usage, completion.
-- `validation.js`: request and ID validation.
-- `answerChecker.js`: normalized, case-insensitive answer comparison.
-- `mystery.controller.js`: public response shaping and progression.
-- `mystery.routes.js`: route-to-controller wiring only.
+API-driven pages must provide:
 
----
+- loading UI while requests are pending
+- explicit error UI for API/network failures
+- empty-state handling where appropriate
+- retry/reload behavior where the page supports it
 
-## 15. Public Data and Private Data
+The API service converts HTTP and network failures into typed `ApiError` instances.
 
-### Public to the frontend
+A failed request must never leave the page blank.
 
-- Mystery ID.
-- Title and description.
-- Story.
-- Question ID, order, and text.
-- Maximum hint count.
-- Current question ID.
-- Completion status.
-- Hint usage counters.
-- Unlock status in the collection response.
+## 12. Architecture Rules
 
-### Private on the backend
+- No direct `fetch` from UI components.
+- No Redux or React Query.
+- No database or authentication.
+- No answer/options data in public question objects.
+- No hardcoded hidden hints in frontend components.
+- No client-side authority over question progression.
+- Keep API-driven page loading explicit with `useState`, `useEffect`, and loader functions.
+- Keep presentational components free from unnecessary data-fetching responsibilities.
+- Keep static content separate from runtime state.
+- Update API documentation whenever the response contract changes.
 
-- Correct answers.
-- Full hint arrays before request.
-- Final reveal before completion.
-- Internal runtime state details not required by the UI.
+## 13. Current Mystery Content
 
----
+The backend currently contains three English mysteries:
 
-## 16. Development Rules
+1. **The Five O'Clock Coffee** — the poison is hidden in melting ice cubes.
+2. **The Rainy Gallery** — a false shelter claim exposes the thief.
+3. **The Midnight Flight** — a seat sensor establishes who left their seat during the blackout.
 
-- Keep API calls in `services/api.ts`.
-- Keep answer input as free text.
-- Do not add answer options to public question data.
-- Do not expose correct answers or hint text early.
-- Do not add Redux or another state library.
-- Keep layout components presentational.
-- Keep gameplay progression backend-driven.
-- Update `API.md` and `TASKS-UI-REDESIGN.md` when behavior changes.
-- Remove unused Vite starter CSS to prevent style conflicts.
+Each mystery contains three ordered questions and up to two hints per question.
 
----
+## 14. Development and QA
 
-## 17. Completion Criteria
+Before merging gameplay changes, verify:
 
-The updated structure is correctly implemented when:
-
-- All target routes exist.
-- Generated room images are integrated.
-- Home and gameplay layouts match the reference direction.
-- Desktop and mobile layouts work.
-- Answers are typed into a text input.
-- Hints are requested from the API.
-- Result and notification states are visible.
-- API and TypeScript types agree.
-- The frontend builds successfully.
+- collection loading
+- mystery locking
+- exploration page
+- current-question selection
+- wrong answer retry
+- correct answer progression
+- hint 1
+- hint 2
+- hint limit
+- question-order enforcement
+- completion
+- final reveal
+- next mystery unlocking
+- result navigation
+- 404 route
+- API/network error UI
+- responsive behavior
