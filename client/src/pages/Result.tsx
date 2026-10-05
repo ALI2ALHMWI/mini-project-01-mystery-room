@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import SuccessScreen from "../components/result/SuccessScreen";
@@ -30,7 +30,7 @@ function Result() {
   const [isLoading, setIsLoading] = useState(!navigationState?.finalReveal);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadResult() {
+  const loadResult = useCallback(async () => {
     if (!id) {
       setError("Mystery ID is missing from the URL.");
       setIsLoading(false);
@@ -55,7 +55,7 @@ function Result() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [loadResult]);
 
   useEffect(() => {
     loadResult();
