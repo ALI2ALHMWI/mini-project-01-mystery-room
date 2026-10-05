@@ -95,11 +95,11 @@ export default function MysteryPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [loadMystery]);
+  }, [id, navigate]);
 
   useEffect(() => {
     loadMystery();
-  }, [id, navigate]);
+  }, [loadMystery]);
 
   const orderedQuestions = mystery
     ? [...mystery.questions].sort((a, b) => a.order - b.order)
