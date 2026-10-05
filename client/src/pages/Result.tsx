@@ -55,11 +55,11 @@ function Result() {
     } finally {
       setIsLoading(false);
     }
-  }, [loadResult]);
+  }, [id]);
 
   useEffect(() => {
     loadResult();
-  }, [id]);
+  }, [loadResult]);
 
   const hasNextMystery = Boolean(nextMysteryId);
 
