@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import SuccessScreen from "../components/result/SuccessScreen";
 import { ApiError, getMysteryById } from "../services/api";
@@ -20,10 +20,13 @@ function getErrorMessage(error: unknown): string {
 function Result() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const navigationState = location.state as ResultLocationState | null;
 
   const [finalReveal, setFinalReveal] = useState(navigationState?.finalReveal ?? null);
-  const [nextMysteryId, setNextMysteryId] = useState<string | null>(navigationState?.nextMysteryId ?? null);
+  const [nextMysteryId, setNextMysteryId] = useState<string | null>(
+    navigationState?.nextMysteryId ?? null,
+  );
   const [isLoading, setIsLoading] = useState(!navigationState?.finalReveal);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,6 +65,12 @@ function Result() {
   }, [id]);
 
   const hasNextMystery = Boolean(nextMysteryId);
+
+  function goToNextMystery() {
+    if (!nextMysteryId) return;
+
+    navigate(`/mystery/${encodeURIComponent(nextMysteryId)}`);
+  }
 
   if (isLoading) {
     return (
@@ -104,11 +113,19 @@ function Result() {
           }
           detail={finalReveal}
           primaryLabel={hasNextMystery ? "Next Mystery" : "Back Home"}
+          onPrimary={
+            hasNextMystery
+              ? goToNextMystery
+              : () => navigate("/")
+          }
         />
 
         <div className="result-page__actions">
           {hasNextMystery ? (
-            <Link className="result-page__next-link" to={`/mystery/${encodeURIComponent(nextMysteryId as string)}`}>
+            <Link
+              className="result-page__next-link"
+              to={`/mystery/${encodeURIComponent(nextMysteryId as string)}`}
+            >
               Continue to the next room <span aria-hidden="true">→</span>
             </Link>
           ) : (
