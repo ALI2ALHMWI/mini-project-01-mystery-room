@@ -47,14 +47,12 @@ export default function MysteryPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRequestingHint, setIsRequestingHint] = useState(false);
 
-  useEffect(() => {
+  async function loadMystery() {
     if (!id) {
       setLoadError("Mystery ID is missing from the URL.");
       setIsLoading(false);
       return;
     }
-
-    let active = true;
 
     setIsLoading(true);
     setLoadError(null);
@@ -66,41 +64,41 @@ export default function MysteryPage() {
     setFeedback(null);
     setActionError(null);
 
-    Promise.all([getMysteryById(id), getMysteries()])
-      .then(([loaded, availableRooms]) => {
-        if (!active) return;
+    try {
+      const [loaded, availableRooms] = await Promise.all([
+        getMysteryById(id),
+        getMysteries(),
+      ]);
 
-        if (loaded.completed) {
-          navigate(`/result/${encodeURIComponent(id)}`, { replace: true });
-          return;
-        }
+      if (loaded.completed) {
+        navigate(`/result/${encodeURIComponent(id)}`, { replace: true });
+        return;
+      }
 
-        const current = loaded.questions.find(
-          (question) => question.id === loaded.currentQuestionId,
-        );
+      const current = loaded.questions.find(
+        (question) => question.id === loaded.currentQuestionId,
+      );
 
-        if (!current) {
-          setLoadError("The server returned no valid current question.");
-          return;
-        }
+      if (!current) {
+        setLoadError("The server returned no valid current question.");
+        return;
+      }
 
-        const used = loaded.hintsUsed[String(current.id)] ?? 0;
+      const used = loaded.hintsUsed[String(current.id)] ?? 0;
 
-        setMystery(loaded);
-        setRooms(availableRooms);
-        setQuestionId(current.id);
-        setHintsRemaining(Math.max(current.maxHints - used, 0));
-      })
-      .catch((error: unknown) => {
-        if (active) setLoadError(getErrorMessage(error));
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
+      setMystery(loaded);
+      setRooms(availableRooms);
+      setQuestionId(current.id);
+      setHintsRemaining(Math.max(current.maxHints - used, 0));
+    } catch (error: unknown) {
+      setLoadError(getErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-    return () => {
-      active = false;
-    };
+  useEffect(() => {
+    loadMystery();
   }, [id, navigate]);
 
   const orderedQuestions = mystery
