@@ -4,6 +4,8 @@ import hiddenChamberImage from "../../assets/generated/room-hidden-chamber.jpg";
 
 import "./RoomHero.css";
 
+
+
 interface RoomHeroProps {
   mysteryId: string;
   title: string;
@@ -34,11 +36,7 @@ function RoomHero({
       ? Math.round(((questionNumber - 1) / totalQuestions) * 100)
       : 0;
 
-  function scrollToQuestions() {
-    document
-      .getElementById("mystery-question-panel")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  
 
   return (
     <section className="room-hero">
@@ -63,14 +61,13 @@ function RoomHero({
           <p>{story}</p>
         </div>
 
-        <button
+        <a
           className="room-hero__explore"
-          type="button"
-          onClick={scrollToQuestions}
+          href={`/mystery/${encodeURIComponent(mysteryId)}/explore`}
         >
           Explore the Room
           <span aria-hidden="true">→</span>
-        </button>
+        </a>
 
         <div className="room-hero__progress">
           <div className="room-hero__progress-header">
