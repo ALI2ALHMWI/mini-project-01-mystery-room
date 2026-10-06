@@ -22,7 +22,7 @@
   justify-content: space-between;
   gap: var(--space-4);
 
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4);
 
   background: rgba(7, 19, 33, 0.3);
   border-bottom: 1px solid rgba(43, 75, 104, 0.6);
@@ -86,7 +86,7 @@
 /* Body */
 
 .hint-card__body {
-  padding: var(--space-5);
+  padding: var(--space-4);
 }
 
 .hint-card__empty {
@@ -132,8 +132,8 @@
   gap: var(--space-2);
 
   width: 100%;
-  min-height: 44px;
-  margin-top: var(--space-5);
+  min-height: 40px;
+  margin-top: var(--space-3);
   padding: 11px 14px;
 
   background: transparent;
