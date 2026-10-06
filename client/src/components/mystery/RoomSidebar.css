@@ -1,17 +1,11 @@
 .room-sidebar {
   display: flex;
   flex-direction: column;
-
   min-width: 0;
   padding: var(--space-3);
-
+  overflow: hidden;
   background:
-    linear-gradient(
-      180deg,
-      rgba(16, 41, 67, 0.92),
-      rgba(11, 27, 45, 0.96)
-    );
-
+    linear-gradient(180deg, rgba(16, 41, 67, 0.92), rgba(11, 27, 45, 0.96));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
@@ -25,7 +19,6 @@
 .room-sidebar__eyebrow {
   display: block;
   margin-bottom: var(--space-2);
-
   color: var(--color-primary);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
@@ -38,36 +31,28 @@
   font-size: var(--font-size-xl);
 }
 
-/* Rooms list */
-
 .room-sidebar__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-
+  min-width: 0;
   padding: var(--space-3) 0;
 }
 
 .room-sidebar__room {
   position: relative;
-
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-
+  gap: var(--space-2);
+  min-width: 0;
   min-height: 54px;
   padding: var(--space-2);
-
+  overflow: hidden;
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
-
   color: var(--color-text-muted);
-
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast),
-    color var(--transition-fast);
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .room-sidebar__room:hover:not(.room-sidebar__room--locked) {
@@ -77,13 +62,7 @@
 }
 
 .room-sidebar__room--active {
-  background:
-    linear-gradient(
-      135deg,
-      rgba(245, 184, 61, 0.18),
-      rgba(245, 184, 61, 0.04)
-    );
-
+  background: linear-gradient(135deg, rgba(245, 184, 61, 0.18), rgba(245, 184, 61, 0.04));
   border-color: rgba(245, 184, 61, 0.48);
   color: var(--color-text);
 }
@@ -96,11 +75,9 @@
 .room-sidebar__icon {
   display: grid;
   place-items: center;
-  flex: 0 0 auto;
-
+  flex: 0 0 30px;
   width: 30px;
   height: 30px;
-
   color: var(--color-text-subtle);
   font-size: 18px;
 }
@@ -111,46 +88,47 @@
 
 .room-sidebar__room-content {
   display: flex;
+  flex: 1 1 0;
   flex-direction: column;
   gap: 3px;
-
+  width: 0;
   min-width: 0;
+  overflow: hidden;
+}
+
+.room-sidebar__room-content strong,
+.room-sidebar__room-content small {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .room-sidebar__room-content strong {
-  overflow: hidden;
-
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .room-sidebar__room-content small {
-  overflow: hidden;
-
   color: var(--color-text-subtle);
   font-size: var(--font-size-xs);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .room-sidebar__active-dot {
+  flex: 0 0 6px;
   width: 6px;
   height: 6px;
   margin-left: auto;
-
   background: var(--color-primary);
   border-radius: 50%;
   box-shadow: 0 0 10px rgba(245, 184, 61, 0.8);
 }
 
-/* Progress */
-
 .room-sidebar__progress {
   margin-top: auto;
   padding: var(--space-4);
-
   background: rgba(3, 11, 21, 0.32);
   border: 1px solid rgba(43, 75, 104, 0.45);
   border-radius: var(--radius-md);
@@ -161,9 +139,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-
   margin-bottom: var(--space-3);
-
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
@@ -177,7 +153,6 @@
   width: 100%;
   height: 5px;
   overflow: hidden;
-
   background: var(--color-border);
   border-radius: var(--radius-full);
 }
@@ -185,20 +160,13 @@
 .room-sidebar__progress-track span {
   display: block;
   height: 100%;
-
-  background: linear-gradient(
-    90deg,
-    var(--color-primary-dark),
-    var(--color-primary)
-  );
-
+  background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary));
   border-radius: inherit;
   transition: width var(--transition-normal);
 }
 
 .room-sidebar__progress p {
   margin-top: var(--space-3);
-
   color: var(--color-text-subtle);
   font-size: 11px;
   line-height: 1.5;
@@ -206,10 +174,27 @@
 
 @media (max-width: 1100px) {
   .room-sidebar {
-    padding: var(--space-4);
+    padding: var(--space-3);
   }
 
   .room-sidebar__room {
-    min-height: 58px;
+    min-height: 54px;
+  }
+}
+
+@media (max-width: 768px) {
+  .room-sidebar {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .room-sidebar__list {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .room-sidebar__room {
+    width: 100%;
+    max-width: 100%;
   }
 }
