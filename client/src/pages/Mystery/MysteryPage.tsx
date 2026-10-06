@@ -209,21 +209,6 @@ export default function MysteryPage() {
   return (
     <main className="mystery-page">
       <div className="mystery-page__container container">
-        <div className="mystery-page__topbar">
-          <div>
-            <span className="mystery-page__eyebrow">
-              Mystery Room / Investigation
-            </span>
-            <p className="mystery-page__status">
-              The truth is hidden in the details.
-            </p>
-          </div>
-
-          <span className="mystery-page__question-count">
-            Question {question.order} / {orderedQuestions.length}
-          </span>
-        </div>
-
         <div className="mystery-layout">
           <RoomSidebar
             rooms={rooms}
