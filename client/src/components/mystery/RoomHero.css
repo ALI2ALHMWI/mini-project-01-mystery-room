@@ -11,7 +11,7 @@
 .room-hero__image-wrapper {
   position: relative;
 
-  height: 270px;
+  height: 220px;
   overflow: hidden;
 }
 
@@ -75,9 +75,9 @@
 .room-hero__body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
 
-  padding: var(--space-6);
+  padding: var(--space-4);
 }
 
 .room-hero__eyebrow {
@@ -98,7 +98,7 @@
 
 .room-hero__description {
   max-width: 620px;
-  margin-top: var(--space-3);
+  margin-top: var(--space-2);
 
   color: var(--color-text-muted);
   line-height: var(--line-height-relaxed);
@@ -113,7 +113,7 @@
 }
 
 .room-hero__story h2 {
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
 
   font-size: var(--font-size-md);
 }
@@ -204,11 +204,11 @@
 
 @media (max-width: 768px) {
   .room-hero__image-wrapper {
-    height: 230px;
+    height: 200px;
   }
 
   .room-hero__body {
-    padding: var(--space-5);
+    padding: var(--space-4);
   }
 
   .room-hero__intro h1 {
