@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { useSound } from "../context/SoundContext";
+
 import { ApiError, getMysteries } from "../services/api";
 import type { MysteryListItem } from "../types/mystery.types";
 
@@ -12,6 +14,7 @@ function Home() {
   const [mysteries, setMysteries] = useState<MysteryListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { startAmbient } = useSound();
 
   const loadMysteries = useCallback(async () => {
     setIsLoading(true);
@@ -58,12 +61,13 @@ function Home() {
               <Link
                 className="button button--primary"
                 to={`/mystery/${encodeURIComponent(firstUnlockedMystery.id)}`}
+                onClick={startAmbient}
               >
                 Start Playing
                 <span aria-hidden="true">→</span>
               </Link>
             ) : (
-              <Link className="button button--primary" to="/how-to-play">
+              <Link className="button button--primary" to="/how-to-play" onClick={startAmbient}>
                 Start Playing
                 <span aria-hidden="true">→</span>
               </Link>
