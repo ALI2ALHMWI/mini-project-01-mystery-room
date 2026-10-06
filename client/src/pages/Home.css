@@ -383,7 +383,8 @@
   }
 
   .home-hero__visual {
-    min-height: 310px;
+    min-height: 240px;
+    height: 240px;
   }
 
   .home-hero__visual-overlay {
@@ -397,7 +398,8 @@
   }
 
   .home-hero__content {
-    padding: var(--space-8) var(--space-6);
+    justify-content: flex-start;
+    padding: 28px var(--space-6) 34px;
   }
 
   .home-hero__title {
@@ -405,11 +407,13 @@
   }
 
   .home-hero__description {
+    margin-top: var(--space-5);
     font-size: var(--font-size-md);
   }
 
   .home-hero__actions {
     flex-direction: column;
+    margin-top: var(--space-6);
   }
 
   .button {
