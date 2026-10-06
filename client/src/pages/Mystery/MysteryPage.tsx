@@ -6,6 +6,7 @@ import RoomHero from "../../components/mystery/RoomHero";
 import RoomSidebar from "../../components/mystery/RoomSidebar";
 import QuestionCard from "../../components/question/QuestionCard";
 import { useNotification } from "../../context/NotificationContext";
+import { useSound } from "../../context/SoundContext";
 import {
   ApiError,
   getMysteries,
@@ -31,6 +32,7 @@ export default function MysteryPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showNotification } = useNotification();
+  const { playSuccess, startAmbient } = useSound();
 
   const [mystery, setMystery] = useState<Mystery | null>(null);
   const [rooms, setRooms] = useState<MysteryListItem[]>([]);
@@ -111,6 +113,7 @@ export default function MysteryPage() {
     if (!id || !question || isSubmitting) return;
 
     setIsSubmitting(true);
+    startAmbient();
     setActionError(null);
     setFeedback(null);
 
@@ -123,6 +126,7 @@ export default function MysteryPage() {
       }
 
       showNotification("success", result.message);
+      playSuccess();
 
       if (result.mysteryCompleted) {
         navigate(`/result/${encodeURIComponent(id)}`, {
