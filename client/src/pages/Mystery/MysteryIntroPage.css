@@ -171,7 +171,7 @@
   }
 
   .mystery-intro__content {
-    min-height: 430px;
+    min-height: 0;
   }
 
   .mystery-intro__story {
@@ -197,7 +197,7 @@
   }
 
   .mystery-intro__content {
-    min-height: 390px;
+    min-height: 0;
   }
 
   .mystery-intro h1 {
