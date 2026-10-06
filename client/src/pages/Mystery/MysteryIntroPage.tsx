@@ -82,12 +82,6 @@ function MysteryIntroPage() {
   return (
     <main className="mystery-intro">
       <div className="mystery-intro__container container">
-        <div className="mystery-intro__breadcrumb">
-          <Link to="/">Mystery Room</Link>
-          <span aria-hidden="true">/</span>
-          <span>Explore</span>
-        </div>
-
         <section className="mystery-intro__hero">
           <div className="mystery-intro__content">
             <span className="mystery-intro__eyebrow">Mystery Room</span>
