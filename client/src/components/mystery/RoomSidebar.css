@@ -3,8 +3,7 @@
   flex-direction: column;
 
   min-width: 0;
-  min-height: 620px;
-  padding: var(--space-5);
+  padding: var(--space-3);
 
   background:
     linear-gradient(
@@ -19,7 +18,7 @@
 }
 
 .room-sidebar__heading {
-  padding: var(--space-2) var(--space-2) var(--space-5);
+  padding: var(--space-1) var(--space-2) var(--space-3);
   border-bottom: 1px solid rgba(43, 75, 104, 0.55);
 }
 
@@ -46,7 +45,7 @@
   flex-direction: column;
   gap: var(--space-2);
 
-  padding: var(--space-5) 0;
+  padding: var(--space-3) 0;
 }
 
 .room-sidebar__room {
@@ -56,8 +55,8 @@
   align-items: center;
   gap: var(--space-3);
 
-  min-height: 66px;
-  padding: var(--space-3);
+  min-height: 54px;
+  padding: var(--space-2);
 
   background: transparent;
   border: 1px solid transparent;
