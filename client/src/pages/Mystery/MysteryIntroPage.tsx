@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { ApiError, getMysteryById } from "../../services/api";
 import type { Mystery } from "../../types/mystery.types";
+import SystemState from "../../components/system/SystemState";
 import "./MysteryIntroPage.css";
 
 function getErrorMessage(error: unknown): string {
@@ -59,17 +60,28 @@ function MysteryIntroPage() {
   }
 
   if (error || !mystery) {
+    const isOffline = error?.toLowerCase().includes("server is unavailable");
+    const isNotFound = error?.toLowerCase().includes("not found");
+
     return (
-      <main className="mystery-intro">
-        <div className="mystery-intro__container container">
-          <p className="mystery-intro__error" role="alert">
-            {error ?? "Mystery data is unavailable."}
-          </p>
-          <Link className="mystery-intro__back" to="/">
-            Back Home
-          </Link>
-        </div>
-      </main>
+      <SystemState
+        variant={isOffline ? "offline" : isNotFound ? "not-found" : "error"}
+        title={
+          isOffline
+            ? "The Mystery Room Is Offline"
+            : isNotFound
+              ? "Mystery Not Found"
+              : "Something Went Wrong"
+        }
+        message={
+          isOffline
+            ? "We could not connect to the game server. Make sure the server is running, then try again."
+            : isNotFound
+              ? "This mystery does not exist. Check the URL or return to the mystery rooms."
+              : error ?? "The mystery data is unavailable right now."
+        }
+        onRetry={loadMystery}
+      />
     );
   }
 

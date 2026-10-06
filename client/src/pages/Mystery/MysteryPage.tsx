@@ -20,6 +20,7 @@ import type {
   MysteryListItem,
 } from "../../types/mystery.types";
 
+import SystemState from "../../components/system/SystemState";
 import "./MysteryPage.css";
 
 function getErrorMessage(error: unknown): string {
@@ -194,17 +195,38 @@ export default function MysteryPage() {
 
   if (isLoading) {
     return (
-      <main aria-busy="true">
-        <p>Loading mystery...</p>
+      <main className="mystery-page__loading" aria-busy="true">
+        <div className="mystery-page__loading-card">
+          <span className="mystery-page__loading-spinner" aria-hidden="true" />
+          <p>Opening the mystery room...</p>
+        </div>
       </main>
     );
   }
 
   if (loadError || !mystery || !question) {
+    const isOffline = loadError?.toLowerCase().includes("server is unavailable");
+    const isNotFound = loadError?.toLowerCase().includes("not found");
+
     return (
-      <main>
-        <p role="alert">{loadError ?? "Mystery data is unavailable."}</p>
-      </main>
+      <SystemState
+        variant={isOffline ? "offline" : isNotFound ? "not-found" : "error"}
+        title={
+          isOffline
+            ? "The Mystery Room Is Offline"
+            : isNotFound
+              ? "Mystery Not Found"
+              : "Something Went Wrong"
+        }
+        message={
+          isOffline
+            ? "We could not connect to the game server. Make sure the server is running, then try again."
+            : isNotFound
+              ? "This mystery or question does not exist. Check the URL or return to the mystery rooms."
+              : loadError ?? "The mystery data is unavailable right now."
+        }
+        onRetry={loadMystery}
+      />
     );
   }
 
